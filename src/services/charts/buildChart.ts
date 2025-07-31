@@ -2,9 +2,9 @@ import type { IChartOptions } from "../../types/chartOptions"
 import { getColor, getAbbreviation } from "./dataProcessor";
 
 export function buildChartOption({ title, values, fg, col }: IChartOptions, showLabels = true, isOffPl?: boolean) {
-    // Configuración común
+
     const commonLegendConfig = {
-        type: 'plain', // Cambiado a 'plain' para todos los gráficos
+        type: 'plain',
         orient: 'horizontal',
         top: 'bottom',
         left: 'left',
@@ -18,13 +18,13 @@ export function buildChartOption({ title, values, fg, col }: IChartOptions, show
             const abbr = getAbbreviation(name);
             return `${name} (${abbr})`;
         },
-        selected: {} // Esto permitirá manejar múltiples selecciones
+        selected: {} // This allow multiple selections
     };
 
     let legends = { ...commonLegendConfig };
     let labels = {};
     let center = [];
-    let selectedMode = 'multiple'; // Cambiado a 'multiple' para permitir selección múltiple
+    let selectedMode = 'multiple'; // Allow multiple selection
 
     if (!showLabels) {
         labels = {
@@ -104,7 +104,7 @@ export function buildChartOption({ title, values, fg, col }: IChartOptions, show
             formatter: (params: any) => {
                 const { seriesName, name, value, percent } = params;
                 if (seriesName === 'Frequency') {
-                    return `${name}: ${value} (${percent}%)`;
+                    return `Frequency<br/>${name}: ${percent}%<br/>Entries: ${value}`;
                 } else if (seriesName === 'FG%') {
                     return `${seriesName}<br/>${name}: ${value}%`;
                 }
@@ -116,7 +116,7 @@ export function buildChartOption({ title, values, fg, col }: IChartOptions, show
             {
                 name: 'Frequency',
                 type: 'pie',
-                selectedMode: selectedMode, // Usamos la variable configurada arriba
+                selectedMode: selectedMode,
                 radius: [0, '40%'],
                 center: center,
                 label: {

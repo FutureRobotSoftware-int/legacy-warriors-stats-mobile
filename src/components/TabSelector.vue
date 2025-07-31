@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import ChartsDisplay from './cards/ChartsDisplay.vue'
 import Table from './tabs/Table.vue'
-import BarChartDisplay from './cards/chartCard/BarChartDisplay.vue'
+import BarChartDisplay from './cards/chartCard/chartRender/BarChartDisplay.vue'
 
 const tabs = ['3PTS','Charts', 'Raw Data']
 const selected = ref(0)

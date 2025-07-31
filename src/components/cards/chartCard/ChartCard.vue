@@ -19,8 +19,7 @@
 import { ref } from 'vue';
 import ExpandedView from './ExpandedView.vue';
 import CardFront from './CardFront.vue';
-import CardBack from '../../legacy/CardBack.vue';
-import BaseChart from './BaseChart.vue';
+import BaseChart from './chartRender/BaseChart.vue';
 
 const isExpanded = ref(false);
 const isFlipped = ref(false);

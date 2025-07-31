@@ -1,11 +1,11 @@
 <script setup>
-import FlippableCard from './chartCard/FlippableCard.vue'
+import ChartCard from './chartCard/ChartCard.vue'
 import { computed } from 'vue'
 import { useShotData } from '../../services/stores/shotData'
 import { useGraphFilters } from '../../services/stores/graphFilters'
 import { buildChartOption, buildBarChartOption } from '../../services/charts/buildChart'
 import CardFront from './chartCard/CardFront.vue'
-import BaseChart from './chartCard/BaseChart.vue'
+import BaseChart from './chartCard/chartRender/BaseChart.vue'
 import ExpandedView from './chartCard/ExpandedView.vue'
 import { ref } from 'vue';
 import FilterCard from '../media/FilterCard.vue'
@@ -32,15 +32,15 @@ const metrics = [
   { title: 'Defender Distance', legend: 'getUniqueColumnValues', fieldGoal: 'getFGByColumn', data: 'getGroupedData', args: ['Defender Distance'], isOffPl: false },
 ]
 
-  const filteredEntries = (fieldKey) =>
-    shotDataStore.getFilteredEntries(
-      filters.selectedFilters, 
-      filters.hiddenCategories, 
-      fieldKey, 
-      false
-  )
+const filteredEntries = (fieldKey) =>
+  shotDataStore.getFilteredEntries(
+    filters.selectedFilters, 
+    filters.hiddenCategories, 
+    fieldKey, 
+    false
+)
 
-  const enrichedData = computed(() =>
+const enrichedData = computed(() =>
   metrics.map((metric) => {
     const fieldKey = metric.args[0]
     const dataset = filteredEntries(fieldKey)
@@ -69,7 +69,7 @@ const metrics = [
 <template>
 
   <div class="flex flex-wrap">
-    <FlippableCard
+    <ChartCard
       v-for="(chart, index) in enrichedData"
       :key="index"
       :data="chart.option"

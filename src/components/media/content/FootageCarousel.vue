@@ -1,81 +1,38 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import useEmblaCarousel from 'embla-carousel-vue'
-import { useShotData } from '../../../services/stores/shotData'
-import { fetchDriveIdByVideoName, getGoogleDriveVideoUrl } from '../../../services/utils/getDriveURL'
-import { usePlayers } from '../../../services/stores/players'
+import { watch } from 'vue'
+import { useCarousel } from '../../../services/utils/useCarousel'
+import { useVideoLoader } from '../../../services/footage/useVideoLoader'
+import { useVideoPlayers } from '../../../services/footage/useVideoPlayers'
 import 'video.js/dist/video-js.css'
 import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
 
-// Reactive state variables
-const isLoading = ref(false)
-const showWarning = ref(false)
-const showMissingFootageWarning = ref(false)
-const videoPlayers = ref<InstanceType<typeof VideoPlayer>[]>([])
-const loadedVideos = ref<Set<string>>(new Set()) // Track loaded videos
+// Composable setup
+const {
+  mode,
+  isLoading,
+  showWarning,
+  showMissingFootageWarning,
+  prevBtn,
+  nextBtn,
+  emblaRef,
+  emblaApi,
+  playerStore,
+  shotData,
+  getIdsByMode,
+  handleSlideSelect
+} = useCarousel()
 
-// Store references and mode selection
-const playerStore = usePlayers()
-const shotData = useShotData()
-const mode = ref<'all' | 'random'>('all')
-const videoItems = ref<{ id: string, videoUrl: string | null }[]>([])
+const {
+  loadedVideos,
+  videoItems,
+  loadBatch
+} = useVideoLoader()
 
-// Navigation button refs
-const prevBtn = ref<HTMLButtonElement | null>(null)
-const nextBtn = ref<HTMLButtonElement | null>(null)
-
-// Initialize Embla carousel with configuration
-const [emblaRef, emblaApi] = useEmblaCarousel({ 
-  loop: false,
-  align: 'start',
-  skipSnaps: false
-})
-
-// Get IDs based on current mode (all or random)
-function getIdsByMode(): string[] {
-  const ids = shotData.getActiveIds.map(id => String(id))
-
-  showWarning.value = ids.length > 25
-  showMissingFootageWarning.value = shotData.getActiveIds.some(id => Number(id) > 196)
-
-  if (mode.value === 'random') {
-    return ids.sort(() => Math.random() - 0.5).slice(0, 10)
-  }
-  return ids
-}
-
-// Load a batch of videos
-async function loadBatch(ids: string[], folderId: string) {
-  const batchResults = await Promise.all(
-    ids.map(async (id) => {
-      if (loadedVideos.value.has(id)) return null
-
-      try {
-        const driveId = await fetchDriveIdByVideoName(id, folderId)
-        loadedVideos.value.add(id)
-        return {
-          id,
-          videoUrl: driveId ? getGoogleDriveVideoUrl(driveId) : null,
-        }
-      } catch (error) {
-        console.error(`Error loading video ${id}:`, error)
-        return {
-          id,
-          videoUrl: null,
-        }
-      }
-    })
-  )
-
-  // Update only the loaded videos in the batch
-  batchResults.forEach((result) => {
-    if (!result) return
-    const index = videoItems.value.findIndex(item => item.id === result.id)
-    if (index !== -1) {
-      videoItems.value[index] = result
-    }
-  })
-}
+const {
+  videoPlayers,
+  playPlayer,
+  pauseAllPlayers
+} = useVideoPlayers()
 
 // Load videos with lazy loading
 async function loadDriveVideos() {
@@ -99,70 +56,22 @@ async function loadDriveVideos() {
   isLoading.value = false
 }
 
-// Preload adjacent videos when a slide is selected
-function preloadAdjacentVideos(centerIndex: number) {
-  const selectedFolder = playerStore.selectedPlayer?.folder
-  if (!selectedFolder) return
-
-  const preloadThreshold = 2 // Number of adjacent videos to preload
-  const start = Math.max(0, centerIndex - preloadThreshold)
-  const end = Math.min(videoItems.value.length - 1, centerIndex + preloadThreshold)
-  
-  const idsToLoad = []
-  for (let i = start; i <= end; i++) {
-    const item = videoItems.value[i]
-    if (item && !loadedVideos.value.has(item.id)) {
-      idsToLoad.push(item.id)
-    }
+// Handle navigation
+const handleNavigation = (direction: 'prev' | 'next') => {
+  pauseAllPlayers()
+  if (direction === 'prev') {
+    emblaApi.value?.scrollPrev()
+  } else {
+    emblaApi.value?.scrollNext()
   }
-
-  if (idsToLoad.length > 0) {
-    loadBatch(idsToLoad, selectedFolder)
+  const selectedIndex = handleSlideSelect()
+  if (selectedIndex !== undefined) {
+    // Small timeout to ensure the slide transition is complete
+    setTimeout(() => {
+      playPlayer(selectedIndex)
+    }, 100)
   }
 }
-
-// Pause all video players except the one at given index
-const pauseAllPlayersExcept = (index: number) => {
-  videoPlayers.value.forEach((player, i) => {
-    if (player && i !== index) {
-      player.pause()
-    }
-  })
-}
-
-// Update navigation buttons state based on scroll position
-const updateNavButtons = () => {
-  if (!emblaApi.value) return
-  
-  const prevEnable = emblaApi.value.canScrollPrev()
-  const nextEnable = emblaApi.value.canScrollNext()
-  
-  if (prevBtn.value) {
-    prevBtn.value.disabled = !prevEnable
-    prevBtn.value.style.opacity = prevEnable ? '1' : '0.5'
-    prevBtn.value.style.cursor = prevEnable ? 'pointer' : 'not-allowed'
-  }
-  
-  if (nextBtn.value) {
-    nextBtn.value.disabled = !nextEnable
-    nextBtn.value.style.opacity = nextEnable ? '1' : '0.5'
-    nextBtn.value.style.cursor = nextEnable ? 'pointer' : 'not-allowed'
-  }
-}
-
-// Setup carousel event listeners when mounted
-onMounted(() => {
-  if (emblaApi.value) {
-    emblaApi.value.on('select', () => {
-      const selectedIndex = emblaApi.value?.selectedScrollSnap() || 0
-      pauseAllPlayersExcept(selectedIndex)
-      updateNavButtons()
-      preloadAdjacentVideos(selectedIndex)
-    })
-    
-    emblaApi.value.on('init', updateNavButtons)
-  }
-})
 
 // Watch for changes to active IDs or mode
 watch(() => shotData.getActiveIds, loadDriveVideos, { immediate: true })
@@ -194,7 +103,7 @@ watch(mode, loadDriveVideos)
         ref="prevBtn"
         class="embla__button embla__button--prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70 transition-all"
         :disabled="!emblaApi?.canScrollPrev()"
-        @click="emblaApi?.scrollPrev()"
+        @click="handleNavigation('prev')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 18l-6-6 6-6"/>
@@ -237,7 +146,7 @@ watch(mode, loadDriveVideos)
         ref="nextBtn"
         class="embla__button embla__button--next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70 transition-all"
         :disabled="!emblaApi?.canScrollNext()"
-        @click="emblaApi?.scrollNext()"
+        @click="handleNavigation('next')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 18l6-6-6-6"/>

@@ -10,7 +10,7 @@ import {
   GraphicComponent,
 } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
-import { useGraphFilters } from '../../../services/stores/graphFilters';
+import { useGraphFilters } from '../../../../services/stores/graphFilters';
 import { provide } from 'vue';
 
 use([

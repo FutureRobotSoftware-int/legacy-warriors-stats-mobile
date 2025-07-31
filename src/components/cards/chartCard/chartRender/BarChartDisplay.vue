@@ -1,11 +1,11 @@
 <script setup>
 import { computed } from 'vue'
-import { useShotData } from '../../../services/stores/shotData'
-import { useGraphFilters } from '../../../services/stores/graphFilters'
-import { buildBarChartOption } from '../../../services/charts/buildChart'
-import CardFront from './CardFront.vue'
+import { useShotData } from '../../../../services/stores/shotData'
+import { useGraphFilters } from '../../../../services/stores/graphFilters'
+import { buildBarChartOption } from '../../../../services/charts/buildChart'
+import CardFront from '../CardFront.vue'
 import BaseChart from './BaseChart.vue'
-import ExpandedView from './ExpandedView.vue'
+import ExpandedView from '../ExpandedView.vue'
 import { ref } from 'vue';
 
 const isExpanded = ref(false);
