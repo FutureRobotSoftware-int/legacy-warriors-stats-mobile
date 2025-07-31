@@ -393,5 +393,173 @@ export const useShotData = defineStore('shotData', {
                 return { name, value: inefficiency };
             });
         },
+        getMostCommonFilters() {
+            const commonFilters: Record<string, string> = {};
+
+            // Obtener los valores más comunes para 5 parámetros clave
+            const params = [
+                'Area',
+                'Offensive Action',
+                'Player Direction',
+                'Pass Direction',
+                'Hop/1-2',
+            ];
+
+            params.forEach(param => {
+                const mostCommon = this.getMostCommonColumnValue(param as keyof IShotData);
+                if (mostCommon) {
+                    commonFilters[param] = String(mostCommon);
+                }
+            });
+
+            return commonFilters;
+        },
+        getMostCommonCombination(): Record<string, string> {
+            const params: (keyof IShotData)[] = [
+                'Area',
+                'Offensive Action',
+                'Player Direction',
+                'Pass Direction',
+                'Hop/1-2'
+            ];
+
+            // Crear un mapa para contar las combinaciones
+            const combinationCounts = new Map<string, { count: number, values: Record<string, string> }>();
+
+            this.entries.forEach(entry => {
+                // Crear una clave única para esta combinación
+                const key = params.map(param => String(entry[param] || '')).join('|');
+
+                // Obtener los valores individuales para esta combinación
+                const values = params.reduce((acc, param) => {
+                    acc[param] = String(entry[param] || '');
+                    return acc;
+                }, {} as Record<string, string>);
+
+                if (combinationCounts.has(key)) {
+                    combinationCounts.get(key)!.count += 1;
+                } else {
+                    combinationCounts.set(key, { count: 1, values });
+                }
+            });
+
+            // Encontrar la combinación más común
+            let maxCount = 0;
+            let mostCommonCombination: Record<string, string> = {};
+
+            combinationCounts.forEach(({ count, values }) => {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostCommonCombination = values;
+                }
+            });
+
+            return mostCommonCombination;
+        },
+
+        getTopPlaysByArea(areaLimit: number = 2, actionLimit: number = 2) {
+            // Primero obtener las áreas más comunes
+            const topAreas = this.getGroupedData('Area')
+                .sort((a, b) => b.value - a.value)
+                .slice(0, areaLimit);
+
+            // Luego obtener las acciones más comunes por área
+            const results: Array<{
+                area: string;
+                actions: Array<{ name: string; value: number }>
+            }> = [];
+
+            topAreas.forEach(area => {
+                const areaData = this.entries.filter(entry => entry.Area === area.name);
+                const topActions = this.getGroupedDataForDataset('Offensive Action', areaData)
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, actionLimit);
+
+                results.push({
+                    area: area.name,
+                    actions: topActions
+                });
+            });
+
+            return results;
+        },
+
+        getLeastEfficientByAction(actionLimit: number = 3, areaLimit: number = 2) {
+            // Primero obtener las acciones ofensivas menos eficientes globalmente
+            const actionFG = this.getFGByColumn('Offensive Action');
+            const leastEfficientActions = [...actionFG]
+                .sort((a, b) => a.value - b.value)
+                .slice(0, actionLimit);
+
+            // Luego obtener las áreas menos eficientes para cada acción
+            const results: Array<{
+                action: string;
+                areas: Array<{ name: string; value: number }>
+            }> = [];
+
+            leastEfficientActions.forEach(action => {
+                const actionData = this.entries.filter(entry => entry['Offensive Action'] === action.name);
+                const leastEfficientAreas = this.getFGByColumnForDataset('Area', actionData)
+                    .sort((a, b) => a.value - b.value)
+                    .slice(0, areaLimit);
+
+                results.push({
+                    action: action.name,
+                    areas: leastEfficientAreas
+                });
+            });
+
+            return results;
+        },
+
+        // Helper methods
+        getGroupedDataForDataset<T extends keyof IShotData>(
+            col: T,
+            dataset: IShotData[]
+        ): { value: number; name: string }[] {
+            const values = dataset
+                .map(entry => entry[col])
+                .filter(val => val !== undefined && val !== null && val !== '') as IShotData[T][];
+
+            const countMap: Record<string, number> = {};
+
+            for (const val of values) {
+                const key = String(val);
+                countMap[key] = (countMap[key] || 0) + 1;
+            }
+
+            return Object.entries(countMap).map(([name, value]) => ({
+                name,
+                value,
+            }));
+        },
+
+        getFGByColumnForDataset<T extends keyof IShotData>(
+            col: T,
+            dataset: IShotData[]
+        ): { name: string; value: number }[] {
+            const grouped: Record<string, { makes: number; total: number }> = {};
+
+            dataset.forEach(entry => {
+                const key = String(entry[col]);
+                const result = String(entry["Make/Miss"]).trim();
+
+                if (!key) return;
+
+                if (!grouped[key]) {
+                    grouped[key] = { makes: 0, total: 0 };
+                }
+
+                grouped[key].total += 1;
+                if (result === "Make") {
+                    grouped[key].makes += 1;
+                }
+            });
+
+            return Object.entries(grouped).map(([name, { makes, total }]) => {
+                const fg = total > 0 ? Math.round((makes / total) * 100) : 0;
+                return { name, value: fg };
+            });
+        }
     }
 })

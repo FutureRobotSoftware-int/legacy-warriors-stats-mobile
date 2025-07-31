@@ -8,7 +8,7 @@ import { loadPlayers } from '../services/data/dataLoader'
 
 const selectedPlayerId = ref<number | ''>('')
 const selectedPeriodId = ref<number | ''>('')
-const selectedMode = ref<'general' | 'most-common'>('general')
+const selectedMode = ref<'general' | 'most-common' | 'top-plays' | 'least-efficient'>('general')
 
 const playersStore = usePlayers()
 const periodStore = usePeriod()
@@ -33,22 +33,69 @@ watch(selectedMode, (mode) => {
 
   if (mode === 'general') {
     graphFiltersStore.clearAllGeneral()
+    return
   }
+
+  // Limpiar filtros para cualquier modo especial
+  graphFiltersStore.clearAll()
 
   if (mode === 'most-common') {
-    graphFiltersStore.clearAll()
-    const commonOffensive = shotDataStore.getMostCommonColumnValue('Offensive Action')
-    const defaultAreas = ['Left Wing', 'Right Wing']
-
-    if (commonOffensive) {
-      graphFiltersStore.setFilter('Offensive Action', commonOffensive)
-    }
-
-    defaultAreas.forEach(area => {
-      graphFiltersStore.setFilter('Area', area)
+    // Obtener la combinación más común de los 5 parámetros
+    const mostCommonCombo = shotDataStore.getMostCommonCombination()
+    
+    // Aplicar los filtros
+    Object.entries(mostCommonCombo).forEach(([field, value]) => {
+      if (value) { // Solo aplicar si hay valor
+        graphFiltersStore.setFilter(field, value)
+      }
     })
+  } else if (mode === 'top-plays') {
+    const topPlaysByArea = shotDataStore.getTopPlaysByArea();
+    
+    // Seleccionar las áreas y acciones más comunes
+    const areasToInclude = new Set<string>();
+    const actionsToInclude = new Set<string>();
+    
+    topPlaysByArea.forEach(areaData => {
+      areasToInclude.add(areaData.area);
+      areaData.actions.forEach(action => {
+        actionsToInclude.add(action.name);
+      });
+    });
+
+    // Aplicar filtros
+    areasToInclude.forEach(area => {
+      graphFiltersStore.setFilter('Area', area);
+    });
+    
+    actionsToInclude.forEach(action => {
+      graphFiltersStore.setFilter('Offensive Action', action);
+    });
+    
+  } else if (mode === 'least-efficient') {
+    const leastEfficientByAction = shotDataStore.getLeastEfficientByAction();
+    
+    // Seleccionar las acciones y áreas menos eficientes
+    const actionsToInclude = new Set<string>();
+    const areasToInclude = new Set<string>();
+    
+    leastEfficientByAction.forEach(actionData => {
+      actionsToInclude.add(actionData.action);
+      actionData.areas.forEach(area => {
+        areasToInclude.add(area.name);
+      });
+    });
+
+    // Aplicar filtros
+    actionsToInclude.forEach(action => {
+      graphFiltersStore.setFilter('Offensive Action', action);
+    });
+    
+    areasToInclude.forEach(area => {
+      graphFiltersStore.setFilter('Area', area);
+    });
   }
-})
+});
 
 onMounted(async () => {
   await loadPlayers();
@@ -114,6 +161,8 @@ function handlePlayerChange() {
                     <option value="">-- Select a mode --</option>
                     <option value="general" class="lg:text-sm">General</option>
                     <option value="most-common" class="lg:text-sm">Most Common</option>
+                    <option value="top-plays" class="lg:text-sm">Top Plays</option>
+                    <option value="least-efficient" class="lg:text-sm">Least Efficient</option>
                 </select>
             </div>
         </div>

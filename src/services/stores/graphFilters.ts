@@ -5,11 +5,11 @@ export const useGraphFilters = defineStore('graphFilters', {
         selectedFilters: {} as Record<string, Set<string>>,
         hiddenCategories: {} as Record<string, Set<string>>,
         activeSource: null as string | null,
-        mode: 'general' as 'general' | 'most-common'
+        mode: 'general' as 'general' | 'most-common' | 'top-plays' | 'least-efficient'
     }),
 
     actions: {
-        setMode(newMode: 'general' | 'most-common') {
+        setMode(newMode: 'general' | 'most-common' | 'top-plays' | 'least-efficient') {
             this.mode = newMode;
         },
         setFilter(field: string, value: string, isSingleSelect: boolean = false) {
