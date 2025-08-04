@@ -1,21 +1,23 @@
 import { ref } from 'vue'
-import { fetchDriveIdByVideoName, getGoogleDriveVideoUrl } from '../utils/getDriveURL'
+import { fetchGCSVideoUrl, getGCSVideoUrl } from '../utils/getGCS'
+
 export function useVideoLoader() {
     const loadedVideos = ref<Set<string>>(new Set())
-    const videoItems = ref<{ id: string, videoUrl: string | null }[]>([])
+    const videoItems = ref<{ id: string; videoUrl: string | null }[]>([])
 
-    // Load a batch of videos
-    async function loadBatch(ids: string[], folderId: string) {
+    // Carga un lote de videos desde GCS
+    async function loadBatch(ids: string[], folderPath?: string) {
         const batchResults = await Promise.all(
             ids.map(async (id) => {
                 if (loadedVideos.value.has(id)) return null
 
                 try {
-                    const driveId = await fetchDriveIdByVideoName(id, folderId)
+                    // Usar fetchGCSVideoUrl para verificar existencia (opcional)
+                    const videoUrl = await fetchGCSVideoUrl(id, folderPath)
                     loadedVideos.value.add(id)
                     return {
                         id,
-                        videoUrl: driveId ? getGoogleDriveVideoUrl(driveId) : null,
+                        videoUrl: videoUrl || getGCSVideoUrl(id), // Fallback a URL directa
                     }
                 } catch (error) {
                     console.error(`Error loading video ${id}:`, error)
@@ -27,21 +29,21 @@ export function useVideoLoader() {
             })
         )
 
-        // Update only the loaded videos in the batch
+        // Actualizar solo los videos cargados en el lote
         batchResults.forEach((result) => {
             if (!result) return
-            const index = videoItems.value.findIndex(item => item.id === result.id)
+            const index = videoItems.value.findIndex((item) => item.id === result.id)
             if (index !== -1) {
                 videoItems.value[index] = result
             }
         })
     }
 
-    // Preload adjacent videos when a slide is selected
-    function preloadAdjacentVideos(centerIndex: number, folderId: string | undefined) {
-        if (!folderId) return
+    // Precarga videos adyacentes al slide seleccionado
+    function preloadAdjacentVideos(centerIndex: number, folderPath?: string) {
+        if (!folderPath) return
 
-        const preloadThreshold = 2 // Number of adjacent videos to preload
+        const preloadThreshold = 2 // Número de videos adyacentes a precargar
         const start = Math.max(0, centerIndex - preloadThreshold)
         const end = Math.min(videoItems.value.length - 1, centerIndex + preloadThreshold)
 
@@ -54,7 +56,7 @@ export function useVideoLoader() {
         }
 
         if (idsToLoad.length > 0) {
-            loadBatch(idsToLoad, folderId)
+            loadBatch(idsToLoad, folderPath)
         }
     }
 
@@ -62,6 +64,6 @@ export function useVideoLoader() {
         loadedVideos,
         videoItems,
         loadBatch,
-        preloadAdjacentVideos
+        preloadAdjacentVideos,
     }
 }

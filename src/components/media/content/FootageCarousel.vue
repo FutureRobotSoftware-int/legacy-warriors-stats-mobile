@@ -38,7 +38,7 @@ const {
 async function loadDriveVideos() {
   isLoading.value = true
   const idsToShow = getIdsByMode()
-  const selectedFolder = playerStore.selectedPlayer?.folder
+  const selectedFolder = playerStore.selectedPlayer?.data.toLowerCase()
 
   if (!selectedFolder) {
     videoItems.value = []

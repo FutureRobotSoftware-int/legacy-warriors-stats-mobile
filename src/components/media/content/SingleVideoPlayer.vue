@@ -2,12 +2,12 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
-import { fetchDriveIdByVideoName, getGoogleDriveVideoUrl } from '../../../services/utils/getDriveURL'
+import { fetchGCSVideoUrl } from '../../../services/utils/getGCS'
 import type { IShotData } from '../../../types/shotData'
 
 const props = defineProps<{
   entry: IShotData,
-  folderId?: string
+  folderPath?: string // Cambiado de folderId a folderPath (opcional para subcarpetas en GCS)
 }>()
 
 const videoUrl = ref('')
@@ -16,21 +16,28 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 const player = ref<any>(null)
 
 onMounted(async () => {
-  if (!props.folderId) {
-    console.warn('No folderId provided')
+  try {
+    // Obtener la URL del video desde GCS (con verificación HEAD opcional)
+    const url = await fetchGCSVideoUrl(
+      String(props.entry.id), 
+      props.folderPath?.toLowerCase() // Ejemplo: "videos/torneos" (si tus videos están en `gs://mi-bucket/videos/torneos/123.mp4`)
+    )
+
+    console.log(url)
+
+    if (url) {
+      videoUrl.value = url
+    } else {
+      console.warn(`Video no encontrado en GCS: ID ${props.entry.id}`, props.folderPath?.toLowerCase())
+    }
+  } catch (error) {
+    console.error('Error al cargar el video:', error)
+  } finally {
     isLoading.value = false
-    return
   }
 
-  const driveId = await fetchDriveIdByVideoName(String(props.entry.id), props.folderId)
-  if (driveId) {
-    videoUrl.value = getGoogleDriveVideoUrl(driveId)
-  }
-  isLoading.value = false
-
-  // Esperar al próximo tick para asegurar que el DOM esté actualizado
+  // Inicializar el reproductor
   await nextTick()
-
   if (videoRef.value && videoUrl.value) {
     player.value = videojs(videoRef.value, {
       controls: true,
@@ -44,17 +51,18 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  if (player.value) {
-    player.value.dispose()
-  }
+  player.value?.dispose()
 })
 </script>
 
 <template>
   <div>
+    <!-- Loading state -->
     <div v-if="isLoading" class="flex justify-center items-center h-64">
       <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
     </div>
+
+    <!-- Video player -->
     <div v-else class="rounded-lg">
       <video
         ref="videoRef"
@@ -76,7 +84,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
-/* Opcional: Personaliza los colores del reproductor */
+/* Estilos personalizados (opcional) */
 .video-js {
   --vjs-primary-color: #3a86ff;
 }

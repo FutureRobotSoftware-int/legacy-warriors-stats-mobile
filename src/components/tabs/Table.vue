@@ -16,6 +16,7 @@ const selectedEntry = ref<IShotData | null>(null)
 function openVideo(entry: any) {
   selectedEntry.value = entry
   showExpanded.value = true
+  console.log(selectedEntry)
 }
 
 function closeVideo() {
@@ -58,6 +59,6 @@ function closeVideo() {
     :title="'Play ID: ' + selectedEntry.id"
     @close="closeVideo"
   >
-    <SingleVideoPlayer :entry="selectedEntry" :folder-id="playerStore.selectedPlayer?.folder" />
+    <SingleVideoPlayer :entry="selectedEntry" :folderPath="playerStore.selectedPlayer?.data" />
   </ExpandedView>
 </template>
