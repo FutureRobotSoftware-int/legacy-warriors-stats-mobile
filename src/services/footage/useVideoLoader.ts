@@ -1,23 +1,30 @@
 import { ref } from 'vue'
 import { fetchGCSVideoUrl, getGCSVideoUrl } from '../utils/getGCS'
 
+/**
+ * Composable for managing video loading with lazy loading and preloading
+ */
 export function useVideoLoader() {
     const loadedVideos = ref<Set<string>>(new Set())
     const videoItems = ref<{ id: string; videoUrl: string | null }[]>([])
 
-    // Carga un lote de videos desde GCS
+    /**
+     * Load a batch of videos from GCS
+     * @param ids - Array of video IDs to load
+     * @param folderPath - Path to the videos in the bucket
+     */
     async function loadBatch(ids: string[], folderPath?: string) {
         const batchResults = await Promise.all(
             ids.map(async (id) => {
                 if (loadedVideos.value.has(id)) return null
 
                 try {
-                    // Usar fetchGCSVideoUrl para verificar existencia (opcional)
+                    // Use fetchGCSVideoUrl to verify existence (optional)
                     const videoUrl = await fetchGCSVideoUrl(id, folderPath)
                     loadedVideos.value.add(id)
                     return {
                         id,
-                        videoUrl: videoUrl || getGCSVideoUrl(id), // Fallback a URL directa
+                        videoUrl: videoUrl || getGCSVideoUrl(id), // Fallback to direct URL
                     }
                 } catch (error) {
                     console.error(`Error loading video ${id}:`, error)
@@ -29,7 +36,7 @@ export function useVideoLoader() {
             })
         )
 
-        // Actualizar solo los videos cargados en el lote
+        // Update only the videos loaded in this batch
         batchResults.forEach((result) => {
             if (!result) return
             const index = videoItems.value.findIndex((item) => item.id === result.id)
@@ -39,11 +46,15 @@ export function useVideoLoader() {
         })
     }
 
-    // Precarga videos adyacentes al slide seleccionado
+    /**
+     * Preload videos adjacent to the selected slide
+     * @param centerIndex - Index of the currently centered slide
+     * @param folderPath - Path to the videos in the bucket
+     */
     function preloadAdjacentVideos(centerIndex: number, folderPath?: string) {
         if (!folderPath) return
 
-        const preloadThreshold = 2 // Número de videos adyacentes a precargar
+        const preloadThreshold = 2 // Number of adjacent videos to preload
         const start = Math.max(0, centerIndex - preloadThreshold)
         const end = Math.min(videoItems.value.length - 1, centerIndex + preloadThreshold)
 
