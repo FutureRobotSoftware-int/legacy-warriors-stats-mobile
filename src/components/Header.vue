@@ -121,7 +121,7 @@ function handlePlayerChange() {
 <template>
     <header class="bg-black p-0 text-white font-medium">
         <p class="absolute text-sm">ShotBreakdown</p>
-        <p class="absolute text-sm right-0">v.0.3.1</p>
+        <p class="absolute text-sm right-0">v.0.3.4</p>
         <div class="flex items-center justify-between mx-24">
             <div class="mx-4">
                 <img src="../assets/BBALLBREAKDOWN-Social-Media-Icon-Medium.png" class="size-12">

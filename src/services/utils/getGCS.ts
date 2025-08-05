@@ -17,16 +17,17 @@ function saveCache(cache: Map<string, CacheEntry>) {
 
 const cache = loadCache();
 
-// URL base de tu CDN o bucket público
-const GCS_BASE_URL = "http://35.241.58.205/"; // Reemplaza con tu URL de CDN
+// URL CDN
+// const GCS_BASE_URL = "http://35.241.58.205/";
+const ALT_CGS_BASE_URL = "https://34.54.50.170/"
 
 export function getGCSVideoUrl(videoName: string): string {
-    return `${GCS_BASE_URL}${videoName}.mp4`;
+    return `${ALT_CGS_BASE_URL}${videoName}.mp4`;
 }
 
 export async function fetchGCSVideoUrl(
     videoName: string,
-    folderPath: string = "" // Opcional: si tienes subcarpetas en el bucket
+    folderPath: string = ""
 ): Promise<string | null> {
     const cacheKey = `${folderPath}/${videoName}`;
     const now = Date.now();
@@ -38,10 +39,9 @@ export async function fetchGCSVideoUrl(
         return cached.url;
     }
 
-    // En GCS no necesitamos una API para verificar existencia (asumimos URLs públicas)
     const videoUrl = getGCSVideoUrl(`${folderPath}/${videoName}`);
 
-    // Opcional: Verificar si el video existe (requiere CORS configurado en el bucket)
+    // Opcional: Verificar si el video existe (requiere CORS)
     try {
         const response = await fetch(videoUrl, { method: 'HEAD' });
         if (response.ok) {
