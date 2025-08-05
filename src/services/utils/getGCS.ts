@@ -19,8 +19,9 @@ function saveCache(cache: Map<string, CacheEntry>) {
 const cache = loadCache();
 
 // CDN URL configuration
-const GCS_BASE_URL = "http://35.241.58.205/";
+// const GCS_BASE_URL = "http://35.241.58.205/";
 // const GCS_BASE_URL = "https://34.54.50.170/"
+const GCS_BASE_URL = "/videos/";
 
 // Generate GCS video URL
 export function getGCSVideoUrl(videoName: string): string {
