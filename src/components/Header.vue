@@ -3,19 +3,18 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { usePlayers } from '../services/stores/players'
 import { usePeriod } from '../services/stores/year'
 import { useGraphFilters } from '../services/stores/graphFilters'
-import { useShotData } from '../services/stores/shotData'
 import { loadPlayers } from '../services/data/dataLoader'
+import { applyLeastEfficientFilters, applyMostCommonFilters, applyTopPlaysFilters} from '../services/selectors/headerModes'
 
 // Reactive state using TypeScript types for better type safety
 const selectedPlayerId = ref<number | ''>('')
 const selectedPeriodId = ref<number | ''>('')
-const selectedMode = ref<'general' | 'most-common' | 'top-plays' | 'least-efficient'>('general')
+const selectedMode = ref<'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom'>('general')
 
 // Pinia store instances
 const playersStore = usePlayers()
 const periodStore = usePeriod()
 const graphFiltersStore = useGraphFilters()
-const shotDataStore = useShotData()
 
 /**
  * Watches for changes in graph filters and resets to default when filters are cleared
@@ -31,9 +30,11 @@ watch(
         selectedPeriodId.value = periodStore.allTimePeriod.id
       }
     }
+    if(graphFiltersStore.mode==='custom') selectedMode.value = 'custom'
   },
   { deep: true }
 )
+
 
 /**
  * Handles mode changes and applies corresponding filters
@@ -44,6 +45,10 @@ watch(selectedMode, (mode) => {
   // Reset filters for general mode
   if (mode === 'general') {
     graphFiltersStore.clearAllGeneral()
+    return
+  }
+
+  if (mode === 'custom') {
     return
   }
 
@@ -62,56 +67,6 @@ watch(selectedMode, (mode) => {
       break
   }
 })
-
-/**
- * Applies filters for most common shot combinations
- */
-const applyMostCommonFilters = () => {
-  const mostCommonCombo = shotDataStore.getMostCommonCombination()
-  Object.entries(mostCommonCombo).forEach(([field, value]) => {
-    if (value) {
-      graphFiltersStore.setFilter(field, value)
-    }
-  })
-}
-
-/**
- * Applies filters for top plays by area
- */
-const applyTopPlaysFilters = () => {
-  const topPlaysByArea = shotDataStore.getTopPlaysByArea()
-  const areasToInclude = new Set<string>()
-  const actionsToInclude = new Set<string>()
-  
-  topPlaysByArea.forEach(areaData => {
-    areasToInclude.add(areaData.area)
-    areaData.actions.forEach(action => {
-      actionsToInclude.add(action.name)
-    })
-  })
-
-  areasToInclude.forEach(area => graphFiltersStore.setFilter('Area', area))
-  actionsToInclude.forEach(action => graphFiltersStore.setFilter('Offensive Action', action))
-}
-
-/**
- * Applies filters for least efficient plays
- */
-const applyLeastEfficientFilters = () => {
-  const leastEfficientByAction = shotDataStore.getLeastEfficientByAction()
-  const actionsToInclude = new Set<string>()
-  const areasToInclude = new Set<string>()
-  
-  leastEfficientByAction.forEach(actionData => {
-    actionsToInclude.add(actionData.action)
-    actionData.areas.forEach(area => {
-      areasToInclude.add(area.name)
-    })
-  })
-
-  actionsToInclude.forEach(action => graphFiltersStore.setFilter('Offensive Action', action))
-  areasToInclude.forEach(area => graphFiltersStore.setFilter('Area', area))
-}
 
 /**
  * Initializes component - loads players and sets default selections
@@ -155,7 +110,7 @@ const availablePeriods = computed(() => {
   <header class="bg-black p-0 text-white font-medium">
     <!-- Version info -->
     <p class="absolute text-sm">ShotBreakdown</p>
-    <p class="absolute text-sm right-0">v.0.3.4</p>
+    <p class="absolute text-sm right-0">v.0.3.6</p>
     
     <!-- Main navigation controls -->
     <div class="flex items-center justify-between mx-24">
@@ -219,6 +174,7 @@ const availablePeriods = computed(() => {
           <option value="most-common">Most Common</option>
           <option value="top-plays">Top Plays</option>
           <option value="least-efficient">Least Efficient</option>
+         <option value="custom">Custom</option> 
         </select>
       </div>
     </div>

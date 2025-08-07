@@ -5,11 +5,11 @@ export const useGraphFilters = defineStore('graphFilters', {
         selectedFilters: {} as Record<string, Set<string>>,
         hiddenCategories: {} as Record<string, Set<string>>,
         activeSource: null as string | null,
-        mode: 'general' as 'general' | 'most-common' | 'top-plays' | 'least-efficient'
+        mode: 'general' as 'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom',
     }),
 
     actions: {
-        setMode(newMode: 'general' | 'most-common' | 'top-plays' | 'least-efficient') {
+        setMode(newMode: 'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom') {
             this.mode = newMode;
         },
         setFilter(field: string, value: string, isSingleSelect: boolean = false) {
@@ -68,12 +68,13 @@ export const useGraphFilters = defineStore('graphFilters', {
             this.selectedFilters = {}
             this.hiddenCategories = {}
             this.activeSource = null
+            this.setMode('general')
         },
         clearAllGeneral() {
             this.selectedFilters = {}
             this.hiddenCategories = {}
             this.activeSource = null
-            this.mode = 'general'
+            this.setMode('general')
         },
         clearFilter(field: string) {
             if (this.selectedFilters[field]) {
