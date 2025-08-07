@@ -41,6 +41,32 @@ export const usePeriod = defineStore('period', {
             console.log(this.periods);
         },
 
+        refreshPeriods() {
+            this.clearPeriods();
+
+            const shotDataStore = useShotData();
+            const uniquePeriods = shotDataStore.getUniqueColumnValues("Year");
+
+            this.periods = [{
+                id: this.nextId++,
+                period: "All time",
+                isSelected: true
+            }];
+
+            this.periods.push(...uniquePeriods.map(p => ({
+                id: this.nextId++,
+                period: p,
+                isSelected: false
+            })));
+
+            console.log(this.periods);
+        },
+
+        clearPeriods() {
+            this.periods = [];
+            this.nextId = 0;
+        },
+
         selectPeriod(period: IPeriod) {
             const filterStore = useGraphFilters();
 
