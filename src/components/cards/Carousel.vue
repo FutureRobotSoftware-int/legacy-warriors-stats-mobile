@@ -18,7 +18,7 @@ const metrics = [
   { title: 'Average PPP', method: 'calcPPP' },
   { title: 'Total Points', method: 'calcTotalPoints' },
   // { title: 'Preferred Dribble Hand', method: 'getMostCommonColumnValue', args: ['Off Dribble Hand'] },
-  // { title: 'Preferred Footwork', method: 'getMostCommonColumnValue', args: ['Hop/1-2'] },
+  // { title: 'Preferred Footwork', method: 'getMostCommonColumnValue', args: ['Footwork'] },
   // { title: 'Preferred Off.', method: 'getMostCommonColumnValue', args: ['Offensive Action'] },
   // { title: 'Frequent Def. Distance', method: 'getMostCommonColumnValue', args: ['Defender Distance'] },
   // { title: 'Least Eff. Off', method: 'getLeastEffectiveColumnValue', args: ['Offensive Action'] },

@@ -4,7 +4,7 @@ export interface IShotData {
     ["Player Direction"]: string;
     ["Pass Direction"]: string;
     ["Offensive Action"]: string;
-    ["Hop/1-2"]: string;
+    ["Footwork"]: string;
     ["Make/Miss"]: string;
     ["Off Dribble Hand"]: string;
     ["Defender Distance"]: string;

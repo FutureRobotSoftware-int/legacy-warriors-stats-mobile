@@ -60,6 +60,9 @@ export const useShotData = defineStore('shotData', {
 
     },
     actions: {
+        getById(id: number) {
+            return this.entries.find((entry) => entry.id = id);
+        },
         clearData() {
             this.entries = [];
             this.nextId = 1;
@@ -402,7 +405,7 @@ export const useShotData = defineStore('shotData', {
                 'Offensive Action',
                 'Player Direction',
                 'Pass Direction',
-                'Hop/1-2',
+                'Footwork',
             ];
 
             params.forEach(param => {
@@ -420,7 +423,7 @@ export const useShotData = defineStore('shotData', {
                 'Offensive Action',
                 'Player Direction',
                 'Pass Direction',
-                'Hop/1-2'
+                'Footwork'
             ];
 
             // Crear un mapa para contar las combinaciones

@@ -32,9 +32,9 @@ Offensive Action;Iso
 Offensive Action;Spot Up
 Offensive Action;Hammer
 Offensive Action;PnPop
-Hop/1-2;Hop  
-Hop/1-2;1-2 Right/Left
-Hop/1-2;1-2 Left/Right
+Footwork;Hop  
+Footwork;1-2 Right/Left
+Footwork;1-2 Left/Right
 Make/Miss;Make
 Make/Miss;Miss
 Defender Distance;Tight
