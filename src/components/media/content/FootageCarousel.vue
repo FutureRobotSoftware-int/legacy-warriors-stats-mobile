@@ -10,8 +10,6 @@ import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
 const {
   mode,
   isLoading,
-  showWarning,
-  showMissingFootageWarning,
   prevBtn,
   nextBtn,
   emblaRef,
@@ -25,7 +23,8 @@ const {
 const {
   loadedVideos,
   videoItems,
-  loadBatch
+  loadBatch,
+  loadSequentially
 } = useVideoLoader()
 
 const {
@@ -52,6 +51,9 @@ async function loadDriveVideos() {
   // Load only the first 3 videos initially
   const initialBatch = idsToShow.slice(0, 3)
   await loadBatch(initialBatch, selectedFolder)
+
+  // Start sequential loading for the rest
+  loadSequentially(selectedFolder)
 
   isLoading.value = false
 }
@@ -80,15 +82,17 @@ watch(mode, loadDriveVideos)
 
 <template>
   <div class="space-y-4 relative">
-    <!-- Warning when too many entries -->
+    <!--
+    <!- Warning when too many entries ->
     <div v-if="showWarning" class="alert alert-warning shadow-sm text-sm">
       <span>⚠️ Too many entries. Please apply more filters to narrow down the footage.</span>
     </div>
 
-    <!-- Warning for potentially missing footage -->
+    <!- Warning for potentially missing footage ->
     <div v-if="showMissingFootageWarning" class="alert alert-info shadow-sm text-sm">
       <span>ℹ️ Some entries have an ID greater than 196 and may not have available footage.</span>
     </div>
+    -->
 
     <!-- Mode selection buttons -->
     <div class="flex gap-2">

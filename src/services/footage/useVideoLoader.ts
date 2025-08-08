@@ -7,6 +7,8 @@ import { fetchGCSVideoUrl, getGCSVideoUrl } from '../utils/getGCS'
 export function useVideoLoader() {
     const loadedVideos = ref<Set<string>>(new Set())
     const videoItems = ref<{ id: string; videoUrl: string | null }[]>([])
+    const currentLoadingIndex = ref(3) // Start loading from index 3 (4th video)
+    const isSequentialLoading = ref(false)
 
     /**
      * Load a batch of videos from GCS
@@ -47,6 +49,42 @@ export function useVideoLoader() {
     }
 
     /**
+     * Load videos sequentially one by one
+     * @param folderPath - Path to the videos in the bucket
+     */
+    async function loadSequentially(folderPath?: string) {
+        if (isSequentialLoading.value || currentLoadingIndex.value >= videoItems.value.length) {
+            return
+        }
+
+        isSequentialLoading.value = true
+        const id = videoItems.value[currentLoadingIndex.value].id
+        
+        try {
+            if (!loadedVideos.value.has(id)) {
+                const videoUrl = await fetchGCSVideoUrl(id, folderPath)
+                loadedVideos.value.add(id)
+                videoItems.value[currentLoadingIndex.value] = {
+                    id,
+                    videoUrl: videoUrl || getGCSVideoUrl(id),
+                }
+            }
+        } catch (error) {
+            console.error(`Error loading video ${id}:`, error)
+            videoItems.value[currentLoadingIndex.value] = {
+                id,
+                videoUrl: null,
+            }
+        }
+
+        currentLoadingIndex.value++
+        isSequentialLoading.value = false
+        
+        // Load next video after a short delay
+        setTimeout(() => loadSequentially(folderPath), 100)
+    }
+
+    /**
      * Preload videos adjacent to the selected slide
      * @param centerIndex - Index of the currently centered slide
      * @param folderPath - Path to the videos in the bucket
@@ -75,6 +113,7 @@ export function useVideoLoader() {
         loadedVideos,
         videoItems,
         loadBatch,
+        loadSequentially,
         preloadAdjacentVideos,
     }
 }
