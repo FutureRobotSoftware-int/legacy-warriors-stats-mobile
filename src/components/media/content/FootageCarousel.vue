@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useCarousel } from '../../../services/utils/useCarousel'
 import { useVideoLoader } from '../../../services/footage/useVideoLoader'
 import { useVideoPlayers } from '../../../services/footage/useVideoPlayers'
 import 'video.js/dist/video-js.css'
 import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
+import SingleTable from '../../tabs/SingleTable.vue'
 
 // Composable setup
 const {
@@ -35,12 +36,19 @@ const {
 
 // Load videos with lazy loading
 async function loadDriveVideos() {
+  if (isLoading.value) return;
+
   isLoading.value = true
   const idsToShow = getIdsByMode()
   const selectedFolder = playerStore.selectedPlayer?.data.toLowerCase()
 
   if (!selectedFolder) {
     videoItems.value = []
+    isLoading.value = false
+    return
+  }
+
+  if (JSON.stringify(videoItems.value.map(i => i.id)) === JSON.stringify(idsToShow)) {
     isLoading.value = false
     return
   }
@@ -76,8 +84,26 @@ const handleNavigation = (direction: 'prev' | 'next') => {
 }
 
 // Watch for changes to active IDs or mode
-watch(() => shotData.getActiveIds, loadDriveVideos, { immediate: true })
-watch(mode, loadDriveVideos)
+watch(() => [...shotData.getActiveIds], loadDriveVideos, { immediate: true })
+watch(mode, loadDriveVideos, { deep: false })
+
+console.log(videoItems);
+
+const dynamicEntries = computed(() => {
+  const items = videoItems.value;
+  return items.map(videoItem => {
+    const shotInfo = shotData.getById(parseInt(videoItem.id));
+    return {
+      ...videoItem,       
+      metadata: {
+        ...shotInfo
+      },         
+    };
+  });
+});
+
+console.log(dynamicEntries)
+
 </script>
 
 <template>
@@ -119,22 +145,26 @@ watch(mode, loadDriveVideos)
         <div class="flex">
           <!-- Slide items -->
           <div
-            v-for="(item, index) in videoItems"
+            v-for="(item, index) in dynamicEntries"
             :key="item.id"
             class="min-w-full px-2 space-y-2"
           >
             <!-- Loading state -->
-            <div v-if="!item.videoUrl && !loadedVideos.has(item.id)" class="bg-gray-100 w-full aspect-video flex items-center justify-center">
+            <div v-if="!item.videoUrl && !loadedVideos.has(item.id.toString())" class="bg-gray-100 w-full aspect-video flex items-center justify-center">
               <span class="loading loading-spinner text-primary"></span>
             </div>
             
             <!-- Video player -->
-            <div v-else-if="item.videoUrl" class="flex justify-center">
+            <div v-else-if="item.videoUrl" class="flex flex-col justify-center">
               <VideoPlayer 
                 :src="item.videoUrl" 
                 :autoplay="index === 0"
                 ref="videoPlayers"
               />
+
+              <div class="">
+                <SingleTable :metadata="item.metadata" />
+              </div>
             </div>
             
             <!-- Missing footage message -->
