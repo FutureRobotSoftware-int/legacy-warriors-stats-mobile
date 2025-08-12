@@ -121,10 +121,10 @@ console.log(dynamicEntries)
     -->
 
     <!-- Mode selection buttons -->
-    <div class="flex gap-2">
+    <!-- <div class="flex gap-2">
       <button class="btn btn-sm btn-primary" @click="mode = 'all'">All</button>
       <button class="btn btn-sm btn-secondary" @click="mode = 'random'">Star Plays</button>
-    </div>
+    </div> -->
 
     <!-- Carousel container -->
     <div class="relative">
@@ -156,15 +156,16 @@ console.log(dynamicEntries)
             
             <!-- Video player -->
             <div v-else-if="item.videoUrl" class="flex flex-col justify-center">
+              <!-- Modified container for SingleTable -->
+              <div class="flex justify-center w-full mb-4">
+                <SingleTable :metadata="item.metadata" />
+              </div>
+              
               <VideoPlayer 
                 :src="item.videoUrl" 
                 :autoplay="index === 0"
                 ref="videoPlayers"
               />
-
-              <div class="">
-                <SingleTable :metadata="item.metadata" />
-              </div>
             </div>
             
             <!-- Missing footage message -->

@@ -32,6 +32,9 @@ export function buildChartOption({ title, values, fg, col }: IChartOptions, show
             position: 'inner',
             fontSize: 10,
             formatter: (params: any) => {
+                if (params.value <= 0) {
+                    return '';
+                }
                 const abbrev = getAbbreviation(params.name);
                 return `${abbrev}`;
             },
@@ -109,6 +112,10 @@ export function buildChartOption({ title, values, fg, col }: IChartOptions, show
                     return `${seriesName}<br/>${name}: ${value}%`;
                 }
                 return `${name}: ${value}`;
+            },
+            position: function (point: number[], _params: any, _dom: any, _rect: any, size: { contentSize: number[]; }) {
+                // Always position tooltip to the right of the cursor
+                return [point[0] - 100, point[1] - (size.contentSize[1] / -20)];
             }
         },
         legend: legends,

@@ -110,7 +110,7 @@ const availablePeriods = computed(() => {
   <header class="bg-black p-0 text-white font-medium">
     <!-- Version info -->
     <p class="absolute text-sm">ShotBreakdown</p>
-    <p class="absolute text-sm right-0">v.0.3.6</p>
+    <p class="absolute text-sm right-0">v.0.3.7</p>
     
     <!-- Main navigation controls -->
     <div class="flex items-center justify-between mx-24">

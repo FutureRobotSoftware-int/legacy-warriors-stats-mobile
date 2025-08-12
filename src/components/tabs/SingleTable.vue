@@ -18,8 +18,8 @@ const fieldsToDisplay = [
 </script>
 
 <template>
-  <div v-if="metadata" class="metadata-table mt-4">
-    <table class="table table-zebra table-xs max-w-20">
+  <div v-if="metadata" class="metadata-table mt-4 w-full flex justify-center">
+    <table class="table table-zebra table-xs max-w-full mx-auto">
       <thead>
         <tr>
           <th v-for="field in fieldsToDisplay" :key="field.key" class="bg-base-200">
