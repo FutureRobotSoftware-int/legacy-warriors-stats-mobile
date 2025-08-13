@@ -124,7 +124,7 @@ export function buildChartOption({ title, values, fg, col }: IChartOptions, show
                 name: 'Frequency',
                 type: 'pie',
                 selectedMode: selectedMode,
-                radius: [0, '40%'],
+                radius: [0, '45%'],
                 center: center,
                 label: {
                     show: false,

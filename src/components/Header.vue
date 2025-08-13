@@ -172,7 +172,7 @@ const availablePeriods = computed(() => {
           <option value="">-- Select a mode --</option>
           <option value="general">General</option>
           <option value="most-common">Most Common</option>
-          <option value="top-plays">Top Plays</option>
+          <option value="top-plays">Key Highlights</option>
           <option value="least-efficient">Least Efficient</option>
          <option value="custom">Custom</option> 
         </select>

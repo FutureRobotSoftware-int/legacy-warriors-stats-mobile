@@ -2,19 +2,19 @@ Area;Player Direction;Pass Direction;Offensive Action;Footwork;Make/Miss;Off Dri
 Top;Away From Hoop;Right;Spot Up;1-2 Left/Right;Miss;N/A;Wide Open;0;2024-2025
 Left Wing;Away From Hoop;Left;Flare;1-2 Left/Right;Miss;N/A;Close;0;2024-2025
 Left Wing;Away From Hoop;Right;Post Kick Out;1-2 Left/Right;Miss;N/A;Wide Open;0;2024-2025
-Left Wing;Away From Hoop;N/A Off Dribble;PnR;1-2 Left/Right;Miss;Left to RightPickUp;Wide Open;0;2024-2025
+Left Wing;Away From Hoop;Catch & Shoot;PnR;1-2 Left/Right;Miss;Left to RightPickUp;Wide Open;0;2024-2025
 Top;Right;From Hoop;Post Kick Out;1-2 Left/Right;Make ;N/A;Wide Open;3;2024-2025
-Right Wing;Away From Hoop;N/A Off Dribble;Iso;1-2 Left/Right;Miss;Left;Close;0;2024-2025
-Left Wing;Left;N/A Off Dribble;Iso;1-2 Left/Right;Miss;Left to RightPickUp;Tight;0;2024-2025
+Right Wing;Away From Hoop;Catch & Shoot;Iso;1-2 Left/Right;Miss;Left;Close;0;2024-2025
+Left Wing;Left;Catch & Shoot;Iso;1-2 Left/Right;Miss;Left to RightPickUp;Tight;0;2024-2025
 Right Wing;Right;From Hoop;Spot Up;1-2 Left/Right;Make ;N/A;Open;3;2024-2025
 Left Wing;Away From Hoop;From Hoop;Drive Kick;1-2 Left/Right;Miss;N/A;Open;0;2024-2025
 Top;Stationary;Left;Spot Up;1-2 Left/Right;Miss;N/A;Wide Open;0;2024-2025
 Left Wing;Right;Right;Post Kick Out;1-2 Left/Right;Miss;N/A;Wide Open;0;2024-2025
-Right Wing;Right;N/A Off Dribble;PnR;1-2 Right/Left;Miss;Left to RightPickUp;Wide Open;0;2024-2025
-Left Corner;Right;N/A Off Dribble;Spot Up;1-2 Right/Left;Miss;Right;Wide Open;0;2024-2025
+Right Wing;Right;Catch & Shoot;PnR;1-2 Right/Left;Miss;Left to RightPickUp;Wide Open;0;2024-2025
+Left Corner;Right;Catch & Shoot;Spot Up;1-2 Right/Left;Miss;Right;Wide Open;0;2024-2025
 Top;Stationary;From Hoop;Spot Up;1-2 Left/Right;Miss;N/A;Tight;0;2024-2025
 Left Corner;Away From Hoop;Left;Spot Up;1-2 Left/Right;Miss;N/A;Close;0;2024-2025
-Right Wing;Away From Hoop;N/A Off Dribble;Iso;1-2 Left/Right;Miss;Right;Open;0;2024-2025
+Right Wing;Away From Hoop;Catch & Shoot;Iso;1-2 Left/Right;Miss;Right;Open;0;2024-2025
 Right Wing;Stationary;Left;Drive Kick;Hop  ;Miss;N/A;Close;0;2024-2025
 Top;Stationary;From Hoop;Post Kick Out;1-2 Left/Right;Make ;N/A;Wide Open;3;2024-2025
 Left Wing;Right;From Hoop;DHO;Hop  ;Miss;N/A;Close;0;2024-2025
@@ -24,4 +24,4 @@ Right Wing;Right;From Hoop;Post Kick Out;Hop  ;Miss;N/A;Open;0;2024-2025
 Top;Stationary;Right;Post Kick Out;1-2 Left/Right;Make ;N/A;Wide Open;3;2024-2025
 Left Corner;Left;From Hoop;Post Kick Out;1-2 Left/Right;Miss;N/A;Open;0;2024-2025
 Left Corner;Stationary;Right;Drive Kick;1-2 Left/Right;Miss;N/A;Wide Open;0;2024-2025
-Top;Left;N/A Off Dribble;PnR;1-2 Left/Right;Make ;Left;Close;3;2024-2025
+Top;Left;Catch & Shoot;PnR;1-2 Left/Right;Make ;Left;Close;3;2024-2025

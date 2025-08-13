@@ -29,7 +29,7 @@ export function getColor(name: string): string {
         'Stationary': '#9eb9f3',
         //Pass Direction
         'From Hoop': '#f89c74',
-        'N/A Off Dribble': '#2c9ec5',
+        'Catch & Shoot': '#2c9ec5',
         //Off Dribble hand
         'Left to RightPickUp': '#87c55f',
         'Right to LeftPickup': '#9eb9f3',
@@ -77,7 +77,7 @@ export function getAbbreviation(name: string): string {
         'Stationary': 'S',
         //Pass Direction
         'From Hoop': 'FH',
-        'N/A Off Dribble': 'N/A',
+        'Catch & Shoot': 'C&S',
         //Off Dribble hand
         'Left to RightPickUp': 'LtR',
         'Right to LeftPickup': 'RtL',
