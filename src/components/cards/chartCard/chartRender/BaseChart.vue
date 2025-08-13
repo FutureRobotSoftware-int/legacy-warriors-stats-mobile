@@ -41,6 +41,7 @@ const filters = useGraphFilters()
 function handleClick(params: any) {
   if (!props.interactive || !props.fieldKey) return
   filters.setFilter(props.fieldKey, params.name)
+  filters.setMode("custom")
 }
 
 function handleLegendToggle(params: any) {

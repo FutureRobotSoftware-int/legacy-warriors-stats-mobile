@@ -174,7 +174,7 @@ const availablePeriods = computed(() => {
           <option value="most-common">Most Common</option>
           <option value="top-plays">Key Highlights</option>
           <option value="least-efficient">Least Efficient</option>
-         <option value="custom">Custom</option> 
+         <option value="custom" hidden>Custom</option> 
         </select>
       </div>
     </div>
