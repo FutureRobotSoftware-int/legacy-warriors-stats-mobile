@@ -1,9 +1,8 @@
 <template>
     <div class="relative">
         <div class="card bg-base-100 shadow-sm h-83 w-68.5 perspective overflow-visible">
-            <div class="relative h-full w-full transition-transform duration-500 transform-style-preserve-3d"
-                :class="{ 'rotate-y-180': isFlipped }">
-                <CardFront :title="title" @flip="toggleFlip" @expand="isExpanded = true">
+            <div class="relative h-full w-full transition-transform duration-500 transform-style-preserve-3d">
+                <CardFront :title="title" @expand="isExpanded = true">
                     <BaseChart :option="data" :fieldKey="fieldKey" :interactive="true" :filterable="true"/>
                 </CardFront>
             </div>
@@ -22,11 +21,6 @@ import CardFront from './CardFront.vue';
 import BaseChart from './chartRender/BaseChart.vue';
 
 const isExpanded = ref(false);
-const isFlipped = ref(false);
-
-const toggleFlip = () => {
-    isFlipped.value = !isFlipped.value;
-};
 
 defineProps({
     title: String,

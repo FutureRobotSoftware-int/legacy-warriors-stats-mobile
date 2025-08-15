@@ -410,7 +410,11 @@ export const useShotData = defineStore('shotData', {
         },
         getTopEntriesByFilters(limit: number = 3): Record<string, string[]> {
             // Key parameters we want to get top entries for
-            const keyParams = ['Area', 'Offensive Action', 'Pass Direction'];
+            const keyParams: (keyof IShotData)[] = [
+                'Area',
+                'Offensive Action',
+                'Pass Direction'
+            ];
             const result: Record<string, string[]> = {};
 
             // Get currently active entries based on filters
