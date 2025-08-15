@@ -6,11 +6,25 @@ export const useGraphFilters = defineStore('graphFilters', {
         hiddenCategories: {} as Record<string, Set<string>>,
         activeSource: null as string | null,
         mode: 'general' as 'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom',
+        topItems: {} as Record<string, string[]>,
     }),
 
+    getters: {
+        getMode: (state) => state.mode,
+    },
+
     actions: {
+        setTopItems(items: Record<string, string[]>) {
+            this.topItems = items;
+        },
+
+        getTopItems(field: string): string[] {
+            return this.topItems[field] || [];
+        },
+
         setMode(newMode: 'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom') {
             this.mode = newMode;
+            console.log('Current Mode', this.mode)
         },
         setFilter(field: string, value: string, isSingleSelect: boolean = false) {
             if (isSingleSelect) {
@@ -68,13 +82,11 @@ export const useGraphFilters = defineStore('graphFilters', {
             this.selectedFilters = {}
             this.hiddenCategories = {}
             this.activeSource = null
-            this.setMode('general')
         },
         clearAllGeneral() {
             this.selectedFilters = {}
             this.hiddenCategories = {}
             this.activeSource = null
-            this.setMode('general')
         },
         clearFilter(field: string) {
             if (this.selectedFilters[field]) {
@@ -84,13 +96,10 @@ export const useGraphFilters = defineStore('graphFilters', {
                 }
             }
         },
+
         replaceFilter(field: string, value: string) {
             this.clearFilter(field);
-
-            this.selectedFilters[field] = new Set([value]);
-            this.activeSource = field;
-
-            console.log('Filtro reemplazado:', field, 'con valor:', value);
+            this.setFilter(field, value);
         },
 
         clearHiddenCategories() {

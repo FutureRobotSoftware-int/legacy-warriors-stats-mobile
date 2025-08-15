@@ -45,6 +45,11 @@ const enrichedData = computed(() =>
     const fieldKey = metric.args[0]
     const dataset = filteredEntries(fieldKey)
 
+    // In most-common mode, we might want to highlight top items
+    if (mode.value === 'most-common') {
+      const topItems = filters.getTopItems(fieldKey);
+    }
+
     const values = shotDataStore[metric.data](...metric.args, dataset)
     const fg =
       mode.value === 'inefficiencies'

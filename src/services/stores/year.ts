@@ -38,7 +38,7 @@ export const usePeriod = defineStore('period', {
                 isSelected: false
             })));
 
-            console.log(this.periods);
+            // console.log(this.periods);
         },
 
         refreshPeriods() {
@@ -59,7 +59,7 @@ export const usePeriod = defineStore('period', {
                 isSelected: false
             })));
 
-            console.log(this.periods);
+            // console.log(this.periods);
         },
 
         clearPeriods() {
@@ -86,7 +86,7 @@ export const usePeriod = defineStore('period', {
                 filterStore.setFilter("Year", period.period, true);
             }
 
-            console.log("[Period Selected]:", period);
+            // console.log("[Period Selected]:", period);
         },
 
         selectAllTime() {

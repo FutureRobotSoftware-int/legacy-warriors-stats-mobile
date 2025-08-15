@@ -11,7 +11,8 @@ import {
 } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
 import { useGraphFilters } from '../../../../services/stores/graphFilters';
-import { provide } from 'vue';
+import { computed, provide } from 'vue';
+import { useShotData } from '../../../../services/stores/shotData';
 
 use([
   CanvasRenderer,
@@ -26,7 +27,6 @@ use([
 ]);
 
 provide(THEME_KEY, 'light');
-
 const props = defineProps({
   option: Object,
   width: { type: String, default: '100%' },
@@ -34,47 +34,69 @@ const props = defineProps({
   fieldKey: String,
   interactive: { type: Boolean, default: true },
   filterable: { type: Boolean, default: true },
-})
+});
 
-const filters = useGraphFilters()
+const filters = useGraphFilters();
+const shotData = useShotData();
 
-function handleClick(params: any) {
-  if (!props.interactive || !props.fieldKey) return
-  filters.setFilter(props.fieldKey, params.name)
-  filters.setMode("custom")
+// Computed property to check if interactive actions should be enabled
+const isInteractive = computed(() => props.interactive && props.fieldKey);
+
+function handleClick(params: { name: string }) {
+  if (!isInteractive.value) return;
+
+  if (filters.getMode === "most-common") {
+    // Set the clicked filter
+    filters.setFilter(props.fieldKey!, params.name);
+    
+    // Get top entries for all key parameters based on current filters
+    const topEntries = shotData.getTopEntriesByFilters();
+    
+    // Apply these top entries to the filters
+    Object.entries(topEntries).forEach(([field, values]) => {
+      // Skip the field we just clicked on
+      if (field !== props.fieldKey) {
+        filters.clearFilter(field);
+        values.forEach(value => {
+          filters.setFilter(field, value);
+        });
+      }
+    });
+  } else {
+    filters.setFilter(props.fieldKey!, params.name);
+    filters.setMode("custom");
+  }
 }
 
-function handleLegendToggle(params: any) {
-  if (!props.interactive || !props.fieldKey) return;
+function handleLegendToggle(params: { selected: Record<string, boolean> }) {
+  if (!isInteractive.value) return;
   
-  // Crear un nuevo objeto para las categorías ocultas
-  const newHiddenCategories = { ...filters.hiddenCategories };
+  const fieldKey = props.fieldKey!;
+  const { selected } = params;
   
-  if (!newHiddenCategories[props.fieldKey]) {
-    newHiddenCategories[props.fieldKey] = new Set();
-  } else {
-    // Crear un nuevo Set para evitar mutaciones directas
-    newHiddenCategories[props.fieldKey] = new Set(newHiddenCategories[props.fieldKey]);
+  // Create a new Set with updated hidden categories
+  const updatedHidden = new Set<string>();
+  
+  for (const [name, isSelected] of Object.entries(selected)) {
+    if (!isSelected) {
+      updatedHidden.add(name);
+    }
   }
   
-  // Actualizar las categorías ocultas basadas en la selección
-  Object.entries(params.selected).forEach(([name, isSelected]) => {
-    if (!isSelected) {
-      newHiddenCategories[props.fieldKey!].add(name);
+  // Update filters store immutably
+  filters.$patch((state) => {
+    if (updatedHidden.size > 0) {
+      state.hiddenCategories = {
+        ...state.hiddenCategories,
+        [fieldKey]: updatedHidden
+      };
     } else {
-      newHiddenCategories[props.fieldKey!].delete(name);
+      // Remove the field if no hidden categories
+      const { [fieldKey]: _, ...rest } = state.hiddenCategories;
+      state.hiddenCategories = rest;
     }
   });
-  
-  // Eliminar el campo si no hay categorías ocultas
-  if (newHiddenCategories[props.fieldKey!].size === 0) {
-    delete newHiddenCategories[props.fieldKey!];
-  }
-  
-  // Actualizar el store
-  filters.hiddenCategories = newHiddenCategories;
 }
-
 </script>
 
 <template>
@@ -87,9 +109,10 @@ function handleLegendToggle(params: any) {
     @legendselectchanged="handleLegendToggle"
   />
 </template>
-  
+
 <style scoped>
 .chart {
   display: block;
+  min-height: 100px; /* Ensure chart has minimum height */
 }
 </style>

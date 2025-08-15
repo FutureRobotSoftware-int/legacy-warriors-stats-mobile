@@ -111,12 +111,12 @@ function clearFilters() {
 
 function clearFilter(field: string) {
     filters.clearFilter(field)
-    filters.setMode('custom')
+    if(filters.getMode != 'most-common') filters.setMode('custom')
 }
 
 function clearHiddenCategories() {
     filters.hiddenCategories = {}
-    filters.setMode('custom')
+    if(filters.getMode != 'most-common') filters.setMode('custom')
 }
 
 function showCategory(field: string) {

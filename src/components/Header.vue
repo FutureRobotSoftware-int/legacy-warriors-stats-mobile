@@ -4,7 +4,7 @@ import { usePlayers } from '../services/stores/players'
 import { usePeriod } from '../services/stores/year'
 import { useGraphFilters } from '../services/stores/graphFilters'
 import { loadPlayers } from '../services/data/dataLoader'
-import { applyLeastEfficientFilters, applyMostCommonFilters, applyTopPlaysFilters} from '../services/selectors/headerModes'
+import { applyLeastEfficientFilters, applyTopPlaysFilters} from '../services/selectors/headerModes'
 
 // Reactive state using TypeScript types for better type safety
 const selectedPlayerId = ref<number | ''>('')
@@ -52,12 +52,9 @@ watch(selectedMode, (mode) => {
     return
   }
 
-  // Clear all filters for special modes
-  graphFiltersStore.clearAll()
-
   switch (mode) {
     case 'most-common':
-      applyMostCommonFilters()
+      // applyMostCommonFilters()
       break
     case 'top-plays':
       applyTopPlaysFilters()
