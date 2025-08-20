@@ -4,7 +4,6 @@ import SmallCard from './SmallCard.vue';
 import { useShotData } from '../../services/stores/shotData';
 import { useGraphFilters } from '../../services/stores/graphFilters';
 import { computed, ref } from 'vue';
-import InfoSection from './carouselContent/infoSection.vue'
 
 const [emblaRef] = emblaCarouselVue()
 const shotDataStore = useShotData()
