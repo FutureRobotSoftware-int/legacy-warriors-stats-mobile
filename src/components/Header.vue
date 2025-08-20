@@ -44,6 +44,7 @@ watch(selectedMode, (mode) => {
 
   // Reset filters for general mode
   if (mode === 'general') {
+    showToast("Chart behaviour reset")
     graphFiltersStore.clearAllGeneral()
     return
   }
@@ -54,6 +55,7 @@ watch(selectedMode, (mode) => {
 
   switch (mode) {
     case 'most-common':
+      showToast("Chart behaviour changed to find most common entries")
       // applyMostCommonFilters()
       break
     case 'top-plays':
@@ -101,13 +103,36 @@ const availablePeriods = computed(() => {
   return periodStore.allPeriods
 })
 
+
+function showToast(message: string = "Operación exitosa"): void {
+  const toast = document.getElementById("myToast");
+
+  if (!toast) {
+    console.warn("Toast element not found");
+    return;
+  }
+
+  const span = toast.querySelector("span");
+  if (span) {
+    span.textContent = message;
+  }
+
+  toast.classList.remove("hidden", "opacity-0");
+
+  setTimeout(() => {
+    toast.classList.add("opacity-0");
+    setTimeout(() => toast.classList.add("hidden"), 600);
+  }, 2000);
+}
+
+
 </script>
 
 <template>
   <header class="bg-black p-0 text-white font-medium">
     <!-- Version info -->
     <p class="absolute text-sm">ShotBreakdown</p>
-    <p class="absolute text-sm right-0">v.0.4.0</p>
+    <p class="absolute text-sm right-0">v.0.4.2</p>
     
     <!-- Main navigation controls -->
     <div class="flex items-center justify-between mx-24">
@@ -176,4 +201,11 @@ const availablePeriods = computed(() => {
       </div>
     </div>
   </header>
+
+  <div class="toast toast-bottom toast-end z-100" aria-live="polite">
+    <!-- Toast (oculto por defecto) -->
+    <div id="myToast" class="alert alert-info hidden transition-opacity duration-300">
+      <span></span>
+    </div>
+  </div>
 </template>
