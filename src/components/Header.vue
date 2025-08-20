@@ -24,12 +24,12 @@ watch(
   (newFilters) => {
     if (Object.keys(newFilters).length === 0) {
       periodStore.selectAllTime()
-      selectedMode.value = 'general'
       
       if (periodStore.allTimePeriod) {
         selectedPeriodId.value = periodStore.allTimePeriod.id
       }
     }
+    selectedMode.value = graphFiltersStore.mode
     if(graphFiltersStore.mode==='custom') selectedMode.value = 'custom'
   },
   { deep: true }
@@ -56,12 +56,15 @@ watch(selectedMode, (mode) => {
   switch (mode) {
     case 'most-common':
       showToast("Chart behaviour changed to find most common entries")
+      graphFiltersStore.clearAllGeneral()
       // applyMostCommonFilters()
       break
     case 'top-plays':
+      graphFiltersStore.clearAllGeneral()
       applyTopPlaysFilters()
       break
     case 'least-efficient':
+      graphFiltersStore.clearAllGeneral()
       applyLeastEfficientFilters()
       break
   }

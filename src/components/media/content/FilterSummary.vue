@@ -107,6 +107,7 @@ const frequency = computed(() => {
 
 function clearFilters() {
     filters.clearAll()
+    if (filters.getMode != "most-common") filters.setMode("general")
 }
 
 function clearFilter(field: string) {
