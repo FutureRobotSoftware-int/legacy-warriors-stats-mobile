@@ -21,20 +21,33 @@ export const applyMostCommonFilters = () => {
 export const applyTopPlaysFilters = () => {
     const shotDataStore = useShotData();
     const graphFiltersStore = useGraphFilters();
-    const topPlaysByArea = shotDataStore.getTopPlaysByArea()
-    const areasToInclude = new Set<string>()
-    const actionsToInclude = new Set<string>()
+    const topPlaysByArea = shotDataStore.getTopPlaysByArea();
+
+    // Sets con las categorías que sí queremos mantener
+    const areasToKeep = new Set<string>();
+    const actionsToKeep = new Set<string>();
 
     topPlaysByArea.forEach(areaData => {
-        areasToInclude.add(areaData.area)
+        areasToKeep.add(areaData.area);
         areaData.actions.forEach(action => {
-            actionsToInclude.add(action.name)
-        })
-    })
+            actionsToKeep.add(action.name);
+        });
+    });
 
-    areasToInclude.forEach(area => graphFiltersStore.setFilter('Area', area))
-    actionsToInclude.forEach(action => graphFiltersStore.setFilter('Offensive Action', action))
-}
+    // Obtener todas las áreas y acciones disponibles
+    const allAreas = shotDataStore.getGroupedData("Area").map(a => a.name);
+    const allActions = shotDataStore.getGroupedData("Offensive Action").map(a => a.name);
+
+    // Ocultar las que NO están en el top
+    allAreas
+        .filter(area => !areasToKeep.has(area))
+        .forEach(area => graphFiltersStore.toggleCategoryVisibility("Area", area));
+
+    allActions
+        .filter(action => !actionsToKeep.has(action))
+        .forEach(action => graphFiltersStore.toggleCategoryVisibility("Offensive Action", action));
+};
+
 
 /**
  * Applies filters for least efficient plays
@@ -42,17 +55,26 @@ export const applyTopPlaysFilters = () => {
 export const applyLeastEfficientFilters = () => {
     const shotDataStore = useShotData();
     const graphFiltersStore = useGraphFilters();
-    const leastEfficientByAction = shotDataStore.getLeastEfficientByAction()
-    const actionsToInclude = new Set<string>()
-    const areasToInclude = new Set<string>()
+    const leastEfficientByAction = shotDataStore.getLeastEfficientByAction();
+
+    const actionsToKeep = new Set<string>();
+    const areasToKeep = new Set<string>();
 
     leastEfficientByAction.forEach(actionData => {
-        actionsToInclude.add(actionData.action)
+        actionsToKeep.add(actionData.action);
         actionData.areas.forEach(area => {
-            areasToInclude.add(area.name)
-        })
-    })
+            areasToKeep.add(area.name);
+        });
+    });
 
-    actionsToInclude.forEach(action => graphFiltersStore.setFilter('Offensive Action', action))
-    areasToInclude.forEach(area => graphFiltersStore.setFilter('Area', area))
-}
+    const allAreas = shotDataStore.getGroupedData("Area").map(a => a.name);
+    const allActions = shotDataStore.getGroupedData("Offensive Action").map(a => a.name);
+
+    allActions
+        .filter(action => !actionsToKeep.has(action))
+        .forEach(action => graphFiltersStore.toggleCategoryVisibility("Offensive Action", action));
+
+    allAreas
+        .filter(area => !areasToKeep.has(area))
+        .forEach(area => graphFiltersStore.toggleCategoryVisibility("Area", area));
+};

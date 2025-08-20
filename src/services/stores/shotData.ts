@@ -351,7 +351,7 @@ export const useShotData = defineStore('shotData', {
 
         // Analysis helpers
         getMostCommonCombination(): Record<string, string> {
-            const params = ['Area', 'Offensive Action', 'Pass Direction'] as const;
+            const params = ['Area', 'Offensive Action', 'Footwork'] as const;
             const combinationCounts = new Map<string, { count: number, values: Record<string, string> }>();
 
             for (const entry of this.entries) {
@@ -413,7 +413,7 @@ export const useShotData = defineStore('shotData', {
             const keyParams: (keyof IShotData)[] = [
                 'Area',
                 'Offensive Action',
-                'Pass Direction'
+                'Footwork'
             ];
             const result: Record<string, string[]> = {};
 
