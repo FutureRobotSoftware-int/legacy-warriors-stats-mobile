@@ -5,7 +5,7 @@ export const useGraphFilters = defineStore('graphFilters', {
         selectedFilters: {} as Record<string, Set<string>>,
         hiddenCategories: {} as Record<string, Set<string>>,
         activeSource: null as string | null,
-        mode: 'general' as 'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom',
+        mode: 'general' as 'general' | 'most-common' | 'least-efficient' | 'custom',
         topItems: {} as Record<string, string[]>,
     }),
 
@@ -22,7 +22,7 @@ export const useGraphFilters = defineStore('graphFilters', {
             return this.topItems[field] || [];
         },
 
-        setMode(newMode: 'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom') {
+        setMode(newMode: 'general' | 'most-common' | 'least-efficient' | 'custom') {
             this.mode = newMode;
             console.log('Current Mode', this.mode)
         },

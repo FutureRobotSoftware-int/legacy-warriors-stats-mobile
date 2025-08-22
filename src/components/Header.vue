@@ -4,12 +4,12 @@ import { usePlayers } from '../services/stores/players'
 import { usePeriod } from '../services/stores/year'
 import { useGraphFilters } from '../services/stores/graphFilters'
 import { loadPlayers } from '../services/data/dataLoader'
-import { applyLeastEfficientFilters, applyTopPlaysFilters} from '../services/selectors/headerModes'
+import { applyLeastEfficientFilters} from '../services/selectors/headerModes'
 
 // Reactive state using TypeScript types for better type safety
 const selectedPlayerId = ref<number | ''>('')
 const selectedPeriodId = ref<number | ''>('')
-const selectedMode = ref<'general' | 'most-common' | 'top-plays' | 'least-efficient' | 'custom'>('general')
+const selectedMode = ref<'general' | 'most-common' | 'least-efficient' | 'custom'>('general')
 
 // Pinia store instances
 const playersStore = usePlayers()
@@ -58,10 +58,6 @@ watch(selectedMode, (mode) => {
       showToast("Chart behaviour changed to find most common entries")
       graphFiltersStore.clearAllGeneral()
       // applyMostCommonFilters()
-      break
-    case 'top-plays':
-      graphFiltersStore.clearAllGeneral()
-      applyTopPlaysFilters()
       break
     case 'least-efficient':
       graphFiltersStore.clearAllGeneral()
@@ -135,7 +131,7 @@ function showToast(message: string = "Operación exitosa"): void {
   <header class="bg-black p-0 text-white font-medium">
     <!-- Version info -->
     <p class="absolute text-sm">ShotBreakdown</p>
-    <p class="absolute text-sm right-0">v.0.4.3</p>
+    <p class="absolute text-sm right-0">v.0.4.5</p>
     
     <!-- Main navigation controls -->
     <div class="flex items-center justify-between mx-24">
@@ -197,7 +193,6 @@ function showToast(message: string = "Operación exitosa"): void {
           <option value="">-- Select a mode --</option>
           <option value="general">General</option>
           <option value="most-common">Most Common</option>
-          <option value="top-plays">Key Highlights</option>
           <option value="least-efficient">Least Efficient</option>
          <option value="custom" hidden>Custom</option> 
         </select>

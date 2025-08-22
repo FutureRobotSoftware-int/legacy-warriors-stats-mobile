@@ -16,40 +16,6 @@ export const applyMostCommonFilters = () => {
 }
 
 /**
- * Applies filters for top plays by area
- */
-export const applyTopPlaysFilters = () => {
-    const shotDataStore = useShotData();
-    const graphFiltersStore = useGraphFilters();
-    const topPlaysByArea = shotDataStore.getTopPlaysByArea();
-
-    // Sets con las categorías que sí queremos mantener
-    const areasToKeep = new Set<string>();
-    const actionsToKeep = new Set<string>();
-
-    topPlaysByArea.forEach(areaData => {
-        areasToKeep.add(areaData.area);
-        areaData.actions.forEach(action => {
-            actionsToKeep.add(action.name);
-        });
-    });
-
-    // Obtener todas las áreas y acciones disponibles
-    const allAreas = shotDataStore.getGroupedData("Area").map(a => a.name);
-    const allActions = shotDataStore.getGroupedData("Offensive Action").map(a => a.name);
-
-    // Ocultar las que NO están en el top
-    allAreas
-        .filter(area => !areasToKeep.has(area))
-        .forEach(area => graphFiltersStore.toggleCategoryVisibility("Area", area));
-
-    allActions
-        .filter(action => !actionsToKeep.has(action))
-        .forEach(action => graphFiltersStore.toggleCategoryVisibility("Offensive Action", action));
-};
-
-
-/**
  * Applies filters for least efficient plays
  */
 export const applyLeastEfficientFilters = () => {
