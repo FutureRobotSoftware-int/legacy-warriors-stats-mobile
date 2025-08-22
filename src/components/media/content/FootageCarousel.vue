@@ -108,24 +108,6 @@ console.log(dynamicEntries)
 
 <template>
   <div class="space-y-4 relative">
-    <!--
-    <!- Warning when too many entries ->
-    <div v-if="showWarning" class="alert alert-warning shadow-sm text-sm">
-      <span>⚠️ Too many entries. Please apply more filters to narrow down the footage.</span>
-    </div>
-
-    <!- Warning for potentially missing footage ->
-    <div v-if="showMissingFootageWarning" class="alert alert-info shadow-sm text-sm">
-      <span>ℹ️ Some entries have an ID greater than 196 and may not have available footage.</span>
-    </div>
-    -->
-
-    <!-- Mode selection buttons -->
-    <!-- <div class="flex gap-2">
-      <button class="btn btn-sm btn-primary" @click="mode = 'all'">All</button>
-      <button class="btn btn-sm btn-secondary" @click="mode = 'random'">Star Plays</button>
-    </div> -->
-
     <!-- Carousel container -->
     <div class="relative">
       <!-- Previous slide button -->

@@ -1,102 +1,82 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import videojs from 'video.js'
-import 'video.js/dist/video-js.css'
+import { ref, watch } from 'vue'
 import { fetchGCSVideoUrl } from '../../../services/utils/getGCS'
 import type { IShotData } from '../../../types/shotData'
+import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
+import SingleTable from '../../tabs/SingleTable.vue'
 
 const props = defineProps<{
   entry: IShotData,
-  folderPath?: string // Cambiado de folderId a folderPath (opcional para subcarpetas en GCS)
+  folderPath?: string
 }>()
 
 const videoUrl = ref('')
 const isLoading = ref(true)
-const videoRef = ref<HTMLVideoElement | null>(null)
-const player = ref<any>(null)
 
-onMounted(async () => {
+// Load video from GCS
+async function loadVideo() {
   try {
-    // Obtener la URL del video desde GCS (con verificación HEAD opcional)
+    isLoading.value = true
     const url = await fetchGCSVideoUrl(
       String(props.entry.id), 
-      props.folderPath?.toLowerCase() // Ejemplo: "videos/torneos" (si tus videos están en `gs://mi-bucket/videos/torneos/123.mp4`)
+      props.folderPath?.toLowerCase()
     )
-
-    console.log(url)
 
     if (url) {
       videoUrl.value = url
     } else {
-      console.warn(`Video no encontrado en GCS: ID ${props.entry.id}`, props.folderPath?.toLowerCase())
+      console.warn(`Video not found in GCS: ID ${props.entry.id}`, props.folderPath?.toLowerCase())
+      videoUrl.value = ''
     }
   } catch (error) {
-    console.error('Error al cargar el video:', error)
+    console.error('Error loading video:', error)
+    videoUrl.value = ''
   } finally {
     isLoading.value = false
   }
+}
 
-  // Inicializar el reproductor
-  await nextTick()
-  if (videoRef.value && videoUrl.value) {
-    player.value = videojs(videoRef.value, {
-      controls: true,
-      preload: 'metadata',
-      responsive: true,
-      fluid: true
-    }, () => {
-      console.log('Player is ready')
-    })
-  }
-})
+// Watch for changes to entry or folderPath
+watch(() => [props.entry, props.folderPath], loadVideo, { immediate: true })
 
-onBeforeUnmount(() => {
-  player.value?.dispose()
+// Expose methods if needed
+defineExpose({
+  reload: loadVideo
 })
 </script>
 
 <template>
-  <div>
+  <div class="single-video-player space-y-4">
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
+    <div v-if="isLoading" class="flex justify-center items-center h-64 bg-gray-100 rounded-lg">
+      <span class="loading loading-spinner text-primary text-4xl"></span>
     </div>
 
-    <!-- Video player -->
-    <div v-else class="rounded-lg">
-      <video
-        ref="videoRef"
-        class="video-js vjs-big-play-centered"
-        preload="metadata"
-        data-setup="{}"
-      >
-        <source :src="videoUrl" type="video/mp4" />
-        <p class="vjs-no-js">
-          To view this video please enable JavaScript, and consider upgrading to a
-          web browser that
-          <a href="https://videojs.com/html5-video-support/" target="_blank">
-            supports HTML5 video
-          </a>
-        </p>
-      </video>
+    <!-- Video player with metadata table -->
+    <div v-else class="flex flex-col justify-center items-center">
+      <!-- Metadata table -->
+      <div class="w-full mb-4">
+        <SingleTable :metadata="entry" />
+      </div>
+      
+      <!-- Video player or missing footage message -->
+      <div v-if="videoUrl" class="w-full max-w-4xl">
+        <VideoPlayer 
+          :src="videoUrl" 
+          :autoplay="false"
+        />
+      </div>
+      
+      <div v-else class="bg-base-200 border border-base-300 p-8 text-center rounded-md text-lg">
+        <strong>No footage found</strong> for ID <code>{{ entry.id }}</code>.
+      </div>
     </div>
   </div>
 </template>
 
-<style>
-/* Estilos personalizados (opcional) */
-.video-js {
-  --vjs-primary-color: #3a86ff;
-}
-
-.video-js .vjs-big-play-button {
-  background-color: rgba(58, 134, 255, 0.7);
-  border: none;
-  border-radius: 50%;
-  width: 2.5em;
-  height: 2.5em;
-  line-height: 2.5em;
-  margin-left: -1.25em;
-  margin-top: -1.25em;
+<style scoped>
+.single-video-player {
+  max-width: 100%;
+  margin: 0 auto;
 }
 </style>
