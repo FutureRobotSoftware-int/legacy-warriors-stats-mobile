@@ -25,29 +25,34 @@ const props = defineProps({
 
 const videoPlayer = ref(null)
 const player = ref(null)
+let videojs = null
 
 onMounted(async () => {
   try {
-    // Dynamically import to avoid SSR issues
-    videojsLib = (await import('video.js')).default
+    // Load video.js first
+    videojs = (await import('video.js')).default
     await import('video.js/dist/video-js.css')
     
-    // Try different import paths for the plugin
-    try {
-      await import('@douglassllc/videojs-framebyframe/videojs.framebyframe.js')
-      await import('@douglassllc/videojs-framebyframe/videojs.framebyframe.css')
-    } catch (pluginError) {
-      console.warn('Framebyframe plugin not found, trying alternative path')
-    }
+    // Make videojs available globally for plugins that expect it
+    window.videojs = videojs
+    
+    // Load the framebyframe plugin
+    await import('@douglassllc/videojs-framebyframe/videojs.framebyframe.js')
+    await import('@douglassllc/videojs-framebyframe/videojs.framebyframe.css')
     
     initializePlayer()
   } catch (error) {
-    console.error('Failed to load video.js:', error)
+    console.error('Error loading video player:', error)
   }
 })
+
 onBeforeUnmount(() => {
   if (player.value) {
     player.value.dispose()
+  }
+  // Clean up global reference
+  if (window.videojs) {
+    delete window.videojs
   }
 })
 
@@ -58,6 +63,8 @@ watch(() => props.src, (newSrc) => {
 })
 
 const initializePlayer = () => {
+  if (!videojs || !videoPlayer.value) return
+
   player.value = videojs(videoPlayer.value, {
     controls: true,
     autoplay: props.autoplay,
