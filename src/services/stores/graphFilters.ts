@@ -56,26 +56,31 @@ export const useGraphFilters = defineStore('graphFilters', {
         },
 
         toggleCategoryVisibility(field: string, category: string) {
+            // Create the Set if it doesn't exist
             if (!this.hiddenCategories[field]) {
                 this.hiddenCategories[field] = new Set();
             }
 
-            if (this.hiddenCategories[field].has(category)) {
-                this.hiddenCategories[field].delete(category);
+            const fieldSet = this.hiddenCategories[field];
+
+            // Toggle the category
+            if (fieldSet.has(category)) {
+                fieldSet.delete(category);
             } else {
-                this.hiddenCategories[field].add(category);
+                fieldSet.add(category);
             }
 
-            if (this.hiddenCategories[field].size === 0) {
+            // Clean up empty sets
+            if (fieldSet.size === 0) {
                 delete this.hiddenCategories[field];
             }
 
-            console.log('Categorías ocultas:', JSON.stringify(
-                Object.fromEntries(
-                    Object.entries(this.hiddenCategories).map(([k, v]) => [k, Array.from(v)])
-                ),
-                null, 2
+            // Only log in development
+            // if (process.env.NODE_ENV === 'development') {
+            console.log('Hidden categories:', Object.fromEntries(
+                Object.entries(this.hiddenCategories).map(([k, v]) => [k, [...v]])
             ));
+            // }
         },
 
         clearAll() {

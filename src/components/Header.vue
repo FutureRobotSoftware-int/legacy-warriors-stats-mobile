@@ -4,12 +4,10 @@ import { usePlayers } from '../services/stores/players'
 import { usePeriod } from '../services/stores/year'
 import { useGraphFilters } from '../services/stores/graphFilters'
 import { loadPlayers } from '../services/data/dataLoader'
-import { applyLeastEfficientFilters} from '../services/selectors/headerModes'
 
 // Reactive state using TypeScript types for better type safety
 const selectedPlayerId = ref<number | ''>('')
 const selectedPeriodId = ref<number | ''>('')
-const selectedMode = ref<'general' | 'most-common' | 'least-efficient' | 'custom'>('general')
 
 // Pinia store instances
 const playersStore = usePlayers()
@@ -29,42 +27,9 @@ watch(
         selectedPeriodId.value = periodStore.allTimePeriod.id
       }
     }
-    selectedMode.value = graphFiltersStore.mode
-    if(graphFiltersStore.mode==='custom') selectedMode.value = 'custom'
   },
   { deep: true }
 )
-
-
-/**
- * Handles mode changes and applies corresponding filters
- */
-watch(selectedMode, (mode) => {
-  graphFiltersStore.setMode(mode)
-
-  // Reset filters for general mode
-  if (mode === 'general') {
-    showToast("Chart behaviour reset")
-    graphFiltersStore.clearAllGeneral()
-    return
-  }
-
-  if (mode === 'custom') {
-    return
-  }
-
-  switch (mode) {
-    case 'most-common':
-      showToast("Chart behaviour changed to find most common entries")
-      graphFiltersStore.clearAllGeneral()
-      // applyMostCommonFilters()
-      break
-    case 'least-efficient':
-      graphFiltersStore.clearAllGeneral()
-      applyLeastEfficientFilters()
-      break
-  }
-})
 
 /**
  * Initializes component - loads players and sets default selections
@@ -98,40 +63,15 @@ const handlePlayerChange = () => {
 
 const availablePeriods = computed(() => {
   periodStore.refreshPeriods();
-
   return periodStore.allPeriods
 })
-
-
-function showToast(message: string = "Operación exitosa"): void {
-  const toast = document.getElementById("myToast");
-
-  if (!toast) {
-    console.warn("Toast element not found");
-    return;
-  }
-
-  const span = toast.querySelector("span");
-  if (span) {
-    span.textContent = message;
-  }
-
-  toast.classList.remove("hidden", "opacity-0");
-
-  setTimeout(() => {
-    toast.classList.add("opacity-0");
-    setTimeout(() => toast.classList.add("hidden"), 600);
-  }, 2000);
-}
-
-
 </script>
 
 <template>
   <header class="bg-black p-0 text-white font-medium">
     <!-- Version info -->
     <p class="absolute text-sm">ShotBreakdown</p>
-    <p class="absolute text-sm right-0">v.0.4.5</p>
+    <p class="absolute text-sm right-0">v.0.4.8</p>
     
     <!-- Main navigation controls -->
     <div class="flex items-center justify-between mx-24">
@@ -183,20 +123,7 @@ function showToast(message: string = "Operación exitosa"): void {
         </select>
       </div>
       
-      <!-- Mode selection -->
-      <div class="mx-4">
-        <select
-          v-model="selectedMode"
-          class="select select-md rounded-full border-base-100 bg-black w-fit border-2 focus:outline-base-100"
-          aria-label="Select a mode"
-        >
-          <option value="">-- Select a mode --</option>
-          <option value="general">General</option>
-          <option value="most-common">Most Common</option>
-          <option value="least-efficient">Least Efficient</option>
-         <option value="custom" hidden>Custom</option> 
-        </select>
-      </div>
+      <!-- Removed mode selection dropdown -->
     </div>
   </header>
 

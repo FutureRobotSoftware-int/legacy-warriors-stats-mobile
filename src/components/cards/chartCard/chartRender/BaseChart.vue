@@ -50,21 +50,30 @@ function handleClick(params: { name: string }) {
     filters.setFilter(props.fieldKey!, params.name);
     
     // Get top entries for all key parameters based on current filters
-    const topEntries = shotData.getTopEntriesByFilters();
+    const topEntries = shotData.getAllEntriesExceptTop();
     
     // Apply these top entries to the filters
     Object.entries(topEntries).forEach(([field, values]) => {
       // Skip the field we just clicked on
       if (field !== props.fieldKey) {
         filters.clearFilter(field);
-        values.forEach(value => {
-          filters.setFilter(field, value);
+
+        // Create a Set with the values to hide (from topEntries)
+        const valuesToHide = new Set(values);
+        
+        // Update filters store immutably
+        filters.$patch((state) => {
+          if (valuesToHide.size > 0) {
+            state.hiddenCategories = {
+              ...state.hiddenCategories,
+              [field]: valuesToHide
+            };
+          }
         });
       }
     });
   } else {
     filters.setFilter(props.fieldKey!, params.name);
-    filters.setMode("custom");
   }
 }
 

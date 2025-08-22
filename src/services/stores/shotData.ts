@@ -434,6 +434,40 @@ export const useShotData = defineStore('shotData', {
             }
 
             return result;
+        },
+        getAllEntriesExceptTop(limit: number = 3): Record<string, string[]> {
+            // Key parameters we want to process
+            const keyParams: (keyof IShotData)[] = [
+                'Area',
+                'Offensive Action',
+                'Footwork'
+            ];
+            const result: Record<string, string[]> = {};
+
+            // Get currently active entries based on filters
+            const activeEntries = this.getActiveEntries;
+
+            // For each key parameter, get all entries except the top ones
+            for (const param of keyParams) {
+                // Get all entries sorted by value (highest first)
+                const allEntries = this.getGroupedData(param, activeEntries)
+                    .sort((a, b) => b.value - a.value);
+
+                // Get the top entries (to exclude)
+                // const topEntries = allEntries.slice(0, limit).map(item => item.name);
+
+                // Get all other entries (excluding the top ones)
+                const otherEntries = allEntries.slice(limit).map(item => item.name);
+
+                // Store the result - either all except top or just the other entries
+                result[param] = otherEntries;
+
+                // Alternative: If you want to include both top and others separately
+                // result[`${param}_top`] = topEntries;
+                // result[`${param}_others`] = otherEntries;
+            }
+
+            return result;
         }
     }
 });
