@@ -11,8 +11,6 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import videojs from 'video.js'
-import 'video.js/dist/video-js.css'
 
 const props = defineProps({
   src: {
@@ -28,10 +26,25 @@ const props = defineProps({
 const videoPlayer = ref(null)
 const player = ref(null)
 
-onMounted(() => {
-  initializePlayer()
+onMounted(async () => {
+  try {
+    // Dynamically import to avoid SSR issues
+    videojsLib = (await import('video.js')).default
+    await import('video.js/dist/video-js.css')
+    
+    // Try different import paths for the plugin
+    try {
+      await import('@douglassllc/videojs-framebyframe/videojs.framebyframe.js')
+      await import('@douglassllc/videojs-framebyframe/videojs.framebyframe.css')
+    } catch (pluginError) {
+      console.warn('Framebyframe plugin not found, trying alternative path')
+    }
+    
+    initializePlayer()
+  } catch (error) {
+    console.error('Failed to load video.js:', error)
+  }
 })
-
 onBeforeUnmount(() => {
   if (player.value) {
     player.value.dispose()
@@ -54,7 +67,16 @@ const initializePlayer = () => {
     sources: [{
       src: props.src,
       type: 'video/mp4'
-    }]
+    }],
+    plugins: {
+      framebyframe: {
+        fps: 30,
+        steps: [
+          { text: '< 1f', step: -1 },
+          { text: '1f >', step: 1 }
+        ]
+      }
+    }
   }, () => {
     console.log('Player is ready')
   })

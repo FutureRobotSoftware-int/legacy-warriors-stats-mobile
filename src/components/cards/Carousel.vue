@@ -4,6 +4,7 @@ import SmallCard from './SmallCard.vue';
 import { useShotData } from '../../services/stores/shotData';
 import { useGraphFilters } from '../../services/stores/graphFilters';
 import { computed, ref } from 'vue';
+import InfoSection from './carouselContent/InfoSection.vue';
 
 const [emblaRef] = emblaCarouselVue()
 const shotDataStore = useShotData()
@@ -15,7 +16,8 @@ const filteredEntries = computed(() =>
 
 const metrics = [
   { title: 'Overall FG%', method: 'calcFG', suffix: '%' },
-  { title: 'Average PPP', method: 'calcPPP' },
+  // { title: 'Average PPP', method: 'calcPPP' },
+  { title: 'Current Frequency', method: 'getActiveFrequency', suffix: '%' },
 ]
 
 const statCards = computed(() =>

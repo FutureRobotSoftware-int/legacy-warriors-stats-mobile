@@ -46,6 +46,9 @@ export const useShotData = defineStore('shotData', {
         }
     },
     actions: {
+        getActiveFrequency() {
+            return ((this.getActiveEntries.length / this.entries.length) * 100).toFixed(0)
+        },
         getById(id: number) {
             // Fixed assignment operator (=) to comparison (===)
             return this.entries.find(entry => entry.id === id);
