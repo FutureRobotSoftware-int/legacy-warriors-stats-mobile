@@ -13,6 +13,7 @@ import VChart, { THEME_KEY } from 'vue-echarts';
 import { useGraphFilters } from '../../../../services/stores/graphFilters';
 import { computed, provide } from 'vue';
 import { useShotData } from '../../../../services/stores/shotData';
+import type { IShotData } from '../../../../types/shotData';
 
 use([
   CanvasRenderer,
@@ -45,37 +46,77 @@ const isInteractive = computed(() => props.interactive && props.fieldKey);
 function handleClick(params: { name: string }) {
   if (!isInteractive.value) return;
 
-  if (filters.getMode === "most-common") {
-    // Set the clicked filter
-    filters.setFilter(props.fieldKey!, params.name);
-    
-    // Get top entries for all key parameters based on current filters
-    const topEntries = shotData.getAllEntriesExceptTop();
-    
-    // Apply these top entries to the filters
-    Object.entries(topEntries).forEach(([field, values]) => {
-      // Skip the field we just clicked on
-      if (field !== props.fieldKey) {
-        filters.clearFilter(field);
+  const field = props.fieldKey!;
 
-        // Create a Set with the values to hide (from topEntries)
+  // === MODE: MOST-COMMON (como ya tienes) ===
+  if (filters.getMode === "most-common") {
+    filters.setFilter(field, params.name);
+
+    const topEntries = shotData.getAllEntriesExceptTop();
+
+    Object.entries(topEntries).forEach(([f, values]) => {
+      if (f !== field) {
+        filters.clearFilter(f);
+
         const valuesToHide = new Set(values);
-        
-        // Update filters store immutably
         filters.$patch((state) => {
           if (valuesToHide.size > 0) {
             state.hiddenCategories = {
               ...state.hiddenCategories,
-              [field]: valuesToHide
+              [f]: valuesToHide
             };
           }
         });
       }
     });
-  } else {
-    filters.setFilter(props.fieldKey!, params.name);
+    return;
   }
+
+  // === MODE: LEAST-EFFICIENT (interactivo, similar a most-common) ===
+  if (filters.getMode === "least-efficient") {
+    // Selecciona el filtro cliqueado
+    filters.setFilter(field, params.name);
+
+    // Calcula, para los otros campos relevantes, qué categorías ocultar
+    const ignoredField = field as keyof IShotData;
+    const toHideMap = shotData.getAllEntriesExceptLeastEfficientTop(
+      3,       // top N ineficientes a conservar
+      7,       // % mínimo de frecuencia
+      undefined,               // usa los campos por defecto: Area, Offensive Action, Pass Direction
+      shotData.getActiveEntries as IShotData[], // dataset activo
+      ignoredField             // no tocar el campo cliqueado
+    );
+
+    // Aplica las ocultaciones dinámicamente a los otros campos
+    Object.entries(toHideMap).forEach(([f, values]) => {
+      if (f !== field) {
+        filters.clearFilter(f); // Evita conflictos con filtros previos en otros campos
+
+        const valuesToHide = new Set(values);
+        filters.$patch((state) => {
+          // Si el mapa viene vacío, no tocamos ese campo
+          if (valuesToHide.size > 0) {
+            state.hiddenCategories = {
+              ...state.hiddenCategories,
+              [f]: valuesToHide
+            };
+          } else {
+            // Si no hay nada que ocultar, limpiamos el hidden del campo
+            const { [f]: _, ...rest } = state.hiddenCategories;
+            state.hiddenCategories = rest;
+          }
+        });
+      }
+    });
+
+    return;
+  }
+
+  // === DEFAULT (general) ===
+  filters.setFilter(field, params.name);
 }
+
+
 
 function handleLegendToggle(params: { selected: Record<string, boolean> }) {
   if (!isInteractive.value) return;

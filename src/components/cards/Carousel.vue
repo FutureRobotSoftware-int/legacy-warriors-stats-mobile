@@ -57,7 +57,7 @@ const toggleMode = (mode) => {
         break
       case 'least-efficient':
         showToast("Chart behaviour changed to find the least efficient entries")
-        applyLeastEfficientFilters() 
+        // applyLeastEfficientFilters() 
         break
     }
   }

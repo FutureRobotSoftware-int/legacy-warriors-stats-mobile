@@ -468,6 +468,59 @@ export const useShotData = defineStore('shotData', {
             }
 
             return result;
+        },
+
+        getAllEntriesExceptLeastEfficientTop(
+            limit: number = 3,
+            minFrequencyPct: number = 7,
+            fields?: (keyof IShotData)[],
+            dataset?: IShotData[],
+            ignoredField: keyof IShotData | null = null
+        ): Record<string, string[]> {
+            const data = dataset ?? (this.getActiveEntries as IShotData[]);
+            const result: Record<string, string[]> = {};
+
+            // Campos relevantes para este modo (ajústalos si necesitas otros)
+            const targetFields: (keyof IShotData)[] = fields ?? ['Area', 'Offensive Action', 'Pass Direction'];
+
+            const total = data.length || 1;
+
+            for (const field of targetFields) {
+                if (ignoredField && field === ignoredField) continue;
+
+                // Agrupaciones y eficiencia por categoría del campo
+                const grouped = this.getGroupedData(field, data);              // [{ name, value }]
+                const effList = this.getFGByColumn(field, data);               // [{ name, value }]
+                const effMap = new Map<string, number>(effList.map(e => [e.name, e.value]));
+
+                // Filtramos categorías con frecuencia >= umbral mínimo
+                const validNames = grouped
+                    .filter(g => ((g.value / total) * 100) >= minFrequencyPct)
+                    .map(g => g.name);
+
+                // Ordenamos por FG% ascendente (menos eficiente primero)
+                const ranked = validNames
+                    .map(name => ({ name, value: effMap.get(name) ?? 0 }))
+                    .sort((a, b) => a.value - b.value);
+
+                const keepCount = Math.min(limit, ranked.length);
+                const keep = new Set(ranked.slice(0, keepCount).map(r => r.name));
+
+                // Si no hay nada “válido” que conservar, no ocultamos nada para este campo
+                if (keep.size === 0) {
+                    result[String(field)] = [];
+                    continue;
+                }
+
+                // Todas las categorías del campo
+                const allValues = grouped.map(g => g.name);
+                // Ocultamos todo lo que no esté en “keep”
+                const toHide = allValues.filter(name => !keep.has(name));
+
+                result[String(field)] = toHide;
+            }
+
+            return result;
         }
     }
 });
