@@ -8,13 +8,17 @@
 import { onMounted } from "vue";
 
 // Allowed Emails
-const allowedUsers = ["nicolas@futurerobot.dev", "cliente2@empresa.com"];
+const allowedUsers = [
+  "nicolas@futurerobot.dev",
+  "itsupport@bballbreakdown.com",
+  "coachnick@bballbreakdown.com",
+];
 
 onMounted(() => {
   /* global google */
   google.accounts.id.initialize({
     client_id:
-      "1070604966472-m1vqag87akjm74n6k0bmr52jhnh92h0r.apps.googleusercontent.com.apps.googleusercontent.com",
+      "549637070928-11jfdb9g0dtpf1u7tii21ug16gmtc3rn.apps.googleusercontent.com",
     callback: handleCredentialResponse,
   });
 
