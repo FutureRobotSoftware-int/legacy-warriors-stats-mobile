@@ -51,7 +51,7 @@ onMounted(() => {
 
   google.accounts.id.initialize({
     client_id:
-      "1070604966472-m1vqag87akjm74n6k0bmr52jhnh92h0r.apps.googleusercontent.com",
+      "549637070928-11jfdb9g0dtpf1u7tii21ug16gmtc3rn.apps.googleusercontent.com",
     callback: handleCredentialResponse,
   });
 
