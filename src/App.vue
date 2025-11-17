@@ -38,6 +38,8 @@ const isExiting = ref(false);
 
 const allowedUsers = [
   "nicolas@futurerobot.dev",
+  "itsupport@bballbreakdown.com",
+  "coachnick@bballbreakdown.com",
   "gabriela@futurerobot.dev",
   "tomy@futurerobot.dev",
 ];
