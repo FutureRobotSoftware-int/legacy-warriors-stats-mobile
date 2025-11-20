@@ -8,6 +8,9 @@ import InfoSection from "./carouselContent/InfoSection.vue";
 import { applyLeastEfficientFilters } from "../../services/selectors/headerModes";
 import { ref } from "vue";
 import BBRangeSlider from "../date-slider/BBRangeSlider.vue";
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+
+const date = ref();
 
 const dateRange = ref([0, 100]); // demo
 
@@ -153,11 +156,25 @@ function showToast(message = "Operation successful") {
           </div>
         </div>
       </div>
-      <div class="card card-border bg-base-100 text-center min-w-[230px]">
+      <!-- <div class="card card-border bg-base-100 text-center min-w-[230px]">
         <div class="card-body py-2 px-3 gap-1">
           <h2 class="font-medium text-sm">Month Range</h2>
 
           <BBRangeSlider />
+
+          <p class="text-xs opacity-60">Month Range Preview</p>
+        </div>
+      </div> -->
+      <div class="card card-border bg-base-100 text-center min-w-[230px]">
+        <div class="card-body py-2 px-3 gap-1">
+          <h2 class="font-medium text-sm">Month Range</h2>
+
+          <VueDatePicker
+            v-model="date"
+            range
+            :time-config="{ enableTimePicker: false }"
+            :teleport="true"
+          />
 
           <p class="text-xs opacity-60">Month Range Preview</p>
         </div>
