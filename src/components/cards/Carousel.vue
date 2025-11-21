@@ -6,11 +6,9 @@ import { useGraphFilters } from "../../services/stores/graphFilters";
 import { computed } from "vue";
 import InfoSection from "./carouselContent/InfoSection.vue";
 import { applyLeastEfficientFilters } from "../../services/selectors/headerModes";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import BBRangeSlider from "../date-slider/BBRangeSlider.vue";
 import { VueDatePicker } from "@vuepic/vue-datepicker";
-
-const date = ref();
 
 const dateRange = ref([0, 100]); // demo
 
@@ -18,12 +16,46 @@ const [emblaRef] = emblaCarouselVue();
 const shotDataStore = useShotData();
 const graphFiltersStore = useGraphFilters();
 
-const filteredEntries = computed(() =>
-  shotDataStore.getFilteredEntries(
-    graphFiltersStore.selectedFilters,
-    graphFiltersStore.hiddenCategories
-  )
+const date = ref();
+
+watch(
+  date,
+  (newVal) => {
+    console.log("📅 Raw datepicker value:", newVal);
+
+    // No hay rango válido → limpiamos rango global
+    if (!newVal || newVal.length !== 2) {
+      console.warn("⚠️ Datepicker no entregó rango válido → limpiando");
+      graphFiltersStore.setDateRange(null, null);
+      return;
+    }
+
+    const [start, end] = newVal;
+
+    if (!start || !end) {
+      console.log("📅 Rango incompleto → limpiando");
+      graphFiltersStore.setDateRange(null, null);
+      return;
+    }
+
+    console.log("📅 Applying range:", start, end);
+    graphFiltersStore.setDateRange(start, end);
+  },
+  { deep: false }
 );
+
+watch(
+  () => graphFiltersStore.dateRange,
+  ([start, end]) => {
+    if (!start || !end) {
+      console.log("🧽 Resetting local datepicker model");
+      date.value = null; // ⬅️ esto limpia el DatePicker visualmente
+    }
+  },
+  { deep: true }
+);
+
+const filteredEntries = computed(() => shotDataStore.getActiveEntries);
 
 const metrics = [
   { title: "Overall FG%", method: "calcFG", suffix: "%" },
@@ -167,16 +199,12 @@ function showToast(message = "Operation successful") {
       </div> -->
       <div class="card card-border bg-base-100 text-center min-w-[230px]">
         <div class="card-body py-2 px-3 gap-1">
-          <h2 class="font-medium text-sm">Month Range</h2>
-
           <VueDatePicker
             v-model="date"
             range
             :time-config="{ enableTimePicker: false }"
             :teleport="true"
           />
-
-          <p class="text-xs opacity-60">Month Range Preview</p>
         </div>
       </div>
     </div>

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { PieChart, BarChart, LineChart } from 'echarts/charts';
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { PieChart, BarChart, LineChart } from "echarts/charts";
 import {
   TitleComponent,
   TooltipComponent,
   LegendComponent,
   GridComponent,
   GraphicComponent,
-} from 'echarts/components';
-import VChart, { THEME_KEY } from 'vue-echarts';
-import { useGraphFilters } from '../../../../services/stores/graphFilters';
-import { computed, provide } from 'vue';
-import { useShotData } from '../../../../services/stores/shotData';
-import type { IShotData } from '../../../../types/shotData';
+} from "echarts/components";
+import VChart, { THEME_KEY } from "vue-echarts";
+import { useGraphFilters } from "../../../../services/stores/graphFilters";
+import { computed, provide } from "vue";
+import { useShotData } from "../../../../services/stores/shotData";
+import type { IShotData } from "../../../../types/shotData";
 
 use([
   CanvasRenderer,
@@ -24,14 +24,14 @@ use([
   GridComponent,
   BarChart,
   LineChart,
-  GraphicComponent
+  GraphicComponent,
 ]);
 
-provide(THEME_KEY, 'light');
+provide(THEME_KEY, "light");
 const props = defineProps({
   option: Object,
-  width: { type: String, default: '100%' },
-  height: { type: String, default: '100%' },
+  width: { type: String, default: "100%" },
+  height: { type: String, default: "100%" },
   fieldKey: String,
   interactive: { type: Boolean, default: true },
   filterable: { type: Boolean, default: true },
@@ -63,7 +63,7 @@ function handleClick(params: { name: string }) {
           if (valuesToHide.size > 0) {
             state.hiddenCategories = {
               ...state.hiddenCategories,
-              [f]: valuesToHide
+              [f]: valuesToHide,
             };
           }
         });
@@ -80,11 +80,11 @@ function handleClick(params: { name: string }) {
     // Calcula, para los otros campos relevantes, qué categorías ocultar
     const ignoredField = field as keyof IShotData;
     const toHideMap = shotData.getAllEntriesExceptLeastEfficientTop(
-      3,       // top N ineficientes a conservar
-      7,       // % mínimo de frecuencia
-      undefined,               // usa los campos por defecto: Area, Offensive Action, Pass Direction
+      3, // top N ineficientes a conservar
+      7, // % mínimo de frecuencia
+      undefined, // usa los campos por defecto: Area, Offensive Action, Pass Direction
       shotData.getActiveEntries as IShotData[], // dataset activo
-      ignoredField             // no tocar el campo cliqueado
+      ignoredField // no tocar el campo cliqueado
     );
 
     // Aplica las ocultaciones dinámicamente a los otros campos
@@ -98,7 +98,7 @@ function handleClick(params: { name: string }) {
           if (valuesToHide.size > 0) {
             state.hiddenCategories = {
               ...state.hiddenCategories,
-              [f]: valuesToHide
+              [f]: valuesToHide,
             };
           } else {
             // Si no hay nada que ocultar, limpiamos el hidden del campo
@@ -116,29 +116,27 @@ function handleClick(params: { name: string }) {
   filters.setFilter(field, params.name);
 }
 
-
-
 function handleLegendToggle(params: { selected: Record<string, boolean> }) {
   if (!isInteractive.value) return;
-  
+
   const fieldKey = props.fieldKey!;
   const { selected } = params;
-  
+
   // Create a new Set with updated hidden categories
   const updatedHidden = new Set<string>();
-  
+
   for (const [name, isSelected] of Object.entries(selected)) {
     if (!isSelected) {
       updatedHidden.add(name);
     }
   }
-  
+
   // Update filters store immutably
   filters.$patch((state) => {
     if (updatedHidden.size > 0) {
       state.hiddenCategories = {
         ...state.hiddenCategories,
-        [fieldKey]: updatedHidden
+        [fieldKey]: updatedHidden,
       };
     } else {
       // Remove the field if no hidden categories
