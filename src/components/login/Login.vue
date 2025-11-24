@@ -34,7 +34,7 @@ function handleCredentialResponse(response) {
 
   if (allowedUsers.includes(email)) {
     localStorage.setItem("auth", "true");
-    window.location.href = "/app"; // o donde tengas tu web
+    window.location.href = "/app";
   } else {
     alert("No authorized.");
   }

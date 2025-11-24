@@ -23,14 +23,11 @@ export const useShotData = defineStore("shotData", {
       return (entry: IShotData) => {
         const { selectedFilters, hiddenCategories, dateRange } = graphFilters;
 
-        // 1. Filtro por rango de fechas (si existe)
         const [start, end] = dateRange || [null, null];
 
         if (start && end && entry.Date) {
-          const shotDate = new Date(entry.Date); // asume formato parseable "MM/DD/YYYY"
+          const shotDate = new Date(entry.Date);
           if (isNaN(shotDate.getTime())) {
-            // Si la fecha no se puede parsear, puedes decidir excluir o incluir:
-            // return false;
           } else {
             if (shotDate < start || shotDate > end) {
               return false;
@@ -38,13 +35,11 @@ export const useShotData = defineStore("shotData", {
           }
         }
 
-        // 2. Filtros categóricos (lo que ya tenías)
         for (const [key, valueSet] of Object.entries(selectedFilters)) {
           const val = String(entry[key as keyof IShotData]);
           if (!valueSet.has(val)) return false;
         }
 
-        // 3. Categorías ocultas
         for (const [field, hiddenSet] of Object.entries(hiddenCategories)) {
           if (hiddenSet.has(String(entry[field as keyof IShotData])))
             return false;
@@ -366,12 +361,10 @@ export const useShotData = defineStore("shotData", {
       ignoredField: string | null = null,
       ignoreSelf: boolean = true
     ) {
-      // Leemos el rango global del store
       const graphFilters = useGraphFilters();
       const [start, end] = graphFilters.dateRange || [null, null];
 
       return this.entries.filter((entry) => {
-        // 1) Filtro por rango de fechas
         if (start && end) {
           if (!entry.Date) {
             return false;
@@ -380,7 +373,7 @@ export const useShotData = defineStore("shotData", {
           const shotDate = new Date(entry.Date);
 
           if (isNaN(shotDate.getTime())) {
-            console.warn("❓ Fecha inválida en entry:", entry.Date);
+            console.warn("❓ Invalid date:", entry.Date);
             return false;
           }
 
@@ -389,14 +382,12 @@ export const useShotData = defineStore("shotData", {
           }
         }
 
-        // 2) Filtros categóricos (usando los params que ya tenías)
         for (const [key, valueSet] of Object.entries(filters)) {
           if (ignoreSelf && key === ignoredField) continue;
           const val = String(entry[key as keyof IShotData]);
           if (!valueSet.has(val)) return false;
         }
 
-        // 3) Categorías ocultas
         for (const [field, hiddenSet] of Object.entries(hidden)) {
           const val = String(entry[field as keyof IShotData]);
           if (hiddenSet.has(val)) return false;
@@ -544,7 +535,6 @@ export const useShotData = defineStore("shotData", {
       const data = dataset ?? (this.getActiveEntries as IShotData[]);
       const result: Record<string, string[]> = {};
 
-      // Campos relevantes para este modo (ajústalos si necesitas otros)
       const targetFields: (keyof IShotData)[] = fields ?? [
         "Area",
         "Offensive Action",
@@ -556,19 +546,16 @@ export const useShotData = defineStore("shotData", {
       for (const field of targetFields) {
         if (ignoredField && field === ignoredField) continue;
 
-        // Agrupaciones y eficiencia por categoría del campo
         const grouped = this.getGroupedData(field, data); // [{ name, value }]
         const effList = this.getFGByColumn(field, data); // [{ name, value }]
         const effMap = new Map<string, number>(
           effList.map((e) => [e.name, e.value])
         );
 
-        // Filtramos categorías con frecuencia >= umbral mínimo
         const validNames = grouped
           .filter((g) => (g.value / total) * 100 >= minFrequencyPct)
           .map((g) => g.name);
 
-        // Ordenamos por FG% ascendente (menos eficiente primero)
         const ranked = validNames
           .map((name) => ({ name, value: effMap.get(name) ?? 0 }))
           .sort((a, b) => a.value - b.value);
@@ -576,15 +563,12 @@ export const useShotData = defineStore("shotData", {
         const keepCount = Math.min(limit, ranked.length);
         const keep = new Set(ranked.slice(0, keepCount).map((r) => r.name));
 
-        // Si no hay nada “válido” que conservar, no ocultamos nada para este campo
         if (keep.size === 0) {
           result[String(field)] = [];
           continue;
         }
 
-        // Todas las categorías del campo
         const allValues = grouped.map((g) => g.name);
-        // Ocultamos todo lo que no esté en “keep”
         const toHide = allValues.filter((name) => !keep.has(name));
 
         result[String(field)] = toHide;

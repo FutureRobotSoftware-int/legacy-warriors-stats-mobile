@@ -48,7 +48,7 @@ function handleClick(params: { name: string }) {
 
   const field = props.fieldKey!;
 
-  // === MODE: MOST-COMMON (como ya tienes) ===
+  // === MODE: MOST-COMMON  ===
   if (filters.getMode === "most-common") {
     filters.setFilter(field, params.name);
 
@@ -72,36 +72,31 @@ function handleClick(params: { name: string }) {
     return;
   }
 
-  // === MODE: LEAST-EFFICIENT (interactivo, similar a most-common) ===
+  // === MODE: LEAST-EFFICIENT ===
   if (filters.getMode === "least-efficient") {
-    // Selecciona el filtro cliqueado
     filters.setFilter(field, params.name);
 
-    // Calcula, para los otros campos relevantes, qué categorías ocultar
     const ignoredField = field as keyof IShotData;
     const toHideMap = shotData.getAllEntriesExceptLeastEfficientTop(
-      3, // top N ineficientes a conservar
-      7, // % mínimo de frecuencia
-      undefined, // usa los campos por defecto: Area, Offensive Action, Pass Direction
-      shotData.getActiveEntries as IShotData[], // dataset activo
-      ignoredField // no tocar el campo cliqueado
+      3,
+      7,
+      undefined,
+      shotData.getActiveEntries as IShotData[],
+      ignoredField
     );
 
-    // Aplica las ocultaciones dinámicamente a los otros campos
     Object.entries(toHideMap).forEach(([f, values]) => {
       if (f !== field) {
-        filters.clearFilter(f); // Evita conflictos con filtros previos en otros campos
+        filters.clearFilter(f);
 
         const valuesToHide = new Set(values);
         filters.$patch((state) => {
-          // Si el mapa viene vacío, no tocamos ese campo
           if (valuesToHide.size > 0) {
             state.hiddenCategories = {
               ...state.hiddenCategories,
               [f]: valuesToHide,
             };
           } else {
-            // Si no hay nada que ocultar, limpiamos el hidden del campo
             const { [f]: _, ...rest } = state.hiddenCategories;
             state.hiddenCategories = rest;
           }
@@ -112,7 +107,7 @@ function handleClick(params: { name: string }) {
     return;
   }
 
-  // === DEFAULT (general) ===
+  // === DEFAULT ===
   filters.setFilter(field, params.name);
 }
 

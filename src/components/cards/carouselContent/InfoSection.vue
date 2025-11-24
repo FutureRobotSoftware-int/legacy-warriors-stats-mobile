@@ -61,7 +61,7 @@ const handleClose = () => {
         <ul class="list-disc pl-5 space-y-1">
           <li>
             In the Totals section, you can clear/show specific parameters
-            previosly selected.
+            previously selected.
           </li>
           <li>
             See Footage will expand a video player for all the active entries.

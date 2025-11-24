@@ -23,9 +23,8 @@ watch(
   (newVal) => {
     console.log("📅 Raw datepicker value:", newVal);
 
-    // No hay rango válido → limpiamos rango global
     if (!newVal || newVal.length !== 2) {
-      console.warn("⚠️ Datepicker no entregó rango válido → limpiando");
+      console.warn("⚠️ Datepicker didn't return valid range → cleaning");
       graphFiltersStore.setDateRange(null, null);
       return;
     }
@@ -33,7 +32,7 @@ watch(
     const [start, end] = newVal;
 
     if (!start || !end) {
-      console.log("📅 Rango incompleto → limpiando");
+      console.log("📅 Incomplete range → cleaning");
       graphFiltersStore.setDateRange(null, null);
       return;
     }
@@ -49,7 +48,7 @@ watch(
   ([start, end]) => {
     if (!start || !end) {
       console.log("🧽 Resetting local datepicker model");
-      date.value = null; // ⬅️ esto limpia el DatePicker visualmente
+      date.value = null;
     }
   },
   { deep: true }
