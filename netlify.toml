@@ -1,6 +1,6 @@
 [[redirects]]
 from = "/videos/*"
-to = "http://35.241.58.205/:splat"
+to = "http://34.111.120.224/:splat"
 status = 200
 force = true
 headers = {Access-Control-Allow-Origin = "*"}
