@@ -6,8 +6,10 @@ import { useShotData } from "../stores/shotData";
 import type { IShotData } from "../../types/shotData";
 import { usePeriod } from "../stores/year";
 
+const SHOTDATA_BASE_URL = "/shotdata/";
+
 export async function loadPlayers() {
-  const parsedData: any = await parseCSV("data/players.csv");
+  const parsedData: any = await parseCSV(`${SHOTDATA_BASE_URL}players.csv`);
 
   const playersStore = usePlayers();
   const players: Omit<IPlayer, "id">[] = parsedData.map(
@@ -20,21 +22,22 @@ export async function loadPlayers() {
     })
   );
 
-  console.log(players);
+  console.log("[Players loaded from GCS]:", players);
 
   return playersStore.addPlayers(players);
 }
 
 export async function loadFilters() {
   const periodStore = usePeriod();
-
   return periodStore.addPeriods();
 }
 
 export async function loadShotData(player: string) {
   const playerSlug = formatToSlug(player);
-  const path = `../data/${playerSlug}-Shotdata.csv`;
-  const parsedData: any = await parseCSV(path);
+
+  const url = `${SHOTDATA_BASE_URL}${playerSlug}-Shotdata.csv`;
+
+  const parsedData: any = await parseCSV(url);
 
   const shotStore = useShotData();
   const entries: Omit<IShotData, "id">[] = parsedData;

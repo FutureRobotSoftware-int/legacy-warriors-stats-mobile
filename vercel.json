@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/videos/:path*",
+      "destination": "http://34.111.120.224/videos/:path*"
+    },
+    {
+      "source": "/shotdata/:path*",
+      "destination": "http://34.111.120.224/shotdata/:path*"
+    }
+  ]
+}
