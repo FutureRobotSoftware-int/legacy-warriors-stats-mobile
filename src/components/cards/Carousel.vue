@@ -203,6 +203,7 @@ function showToast(message = "Operation successful") {
             range
             :time-config="{ enableTimePicker: false }"
             :teleport="true"
+            placeholder="All time"
           />
         </div>
       </div>
@@ -223,5 +224,8 @@ function showToast(message = "Operation successful") {
 .embla__slide {
   flex: 0 0 100%;
   min-width: 0;
+}
+.dp__theme_light {
+  --dp-text-color: #212121;
 }
 </style>

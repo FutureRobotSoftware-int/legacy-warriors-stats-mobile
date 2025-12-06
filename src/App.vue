@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted } from "vue";
 import Header from "./components/Header.vue";
 import Main from "./components/Main.vue";
 
@@ -44,28 +44,33 @@ const allowedUsers = [
   "tomy@futurerobot.dev",
 ];
 
-onMounted(() => {
-  const logged = localStorage.getItem("auth") === "true";
-  if (logged) {
-    enterAuthorized();
+function enterAuthorized() {
+  isAuthorized.value = true;
+}
+
+function setupGoogleButton(retries = 10) {
+  if (isAuthorized.value) return;
+
+  const target = document.getElementById("g_id_signin");
+  if (!target) return;
+
+  if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+    if (retries <= 0) return;
+    setTimeout(() => setupGoogleButton(retries - 1), 300);
     return;
   }
 
-  google.accounts.id.initialize({
+  window.google.accounts.id.initialize({
     client_id:
       "549637070928-11jfdb9g0dtpf1u7tii21ug16gmtc3rn.apps.googleusercontent.com",
     callback: handleCredentialResponse,
   });
 
-  google.accounts.id.renderButton(document.getElementById("g_id_signin"), {
+  window.google.accounts.id.renderButton(target, {
     theme: "filled_blue",
     size: "large",
     width: "300",
   });
-});
-
-function enterAuthorized() {
-  isAuthorized.value = true;
 }
 
 async function handleCredentialResponse(response) {
@@ -92,8 +97,19 @@ function parseJwt(token) {
       .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
       .join("")
   );
+
   return JSON.parse(jsonPayload);
 }
+
+onMounted(() => {
+  const logged = localStorage.getItem("auth") === "true";
+  if (logged) {
+    enterAuthorized();
+    return;
+  }
+
+  setupGoogleButton();
+});
 </script>
 
 <style>
