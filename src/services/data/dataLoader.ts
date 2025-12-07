@@ -5,6 +5,7 @@ import { usePlayers } from "../stores/players";
 import { useShotData } from "../stores/shotData";
 import type { IShotData } from "../../types/shotData";
 import { usePeriod } from "../stores/year";
+import { normalizeShotEntry } from "../utils/normalizers";
 
 const SHOTDATA_BASE_URL = "/shotdata/";
 
@@ -40,7 +41,10 @@ export async function loadShotData(player: string) {
   const parsedData: any = await parseCSV(url);
 
   const shotStore = useShotData();
-  const entries: Omit<IShotData, "id">[] = parsedData;
+
+  const entries: Omit<IShotData, "id">[] = parsedData.map((row: any) =>
+    normalizeShotEntry(row)
+  );
 
   shotStore.clearData();
 
