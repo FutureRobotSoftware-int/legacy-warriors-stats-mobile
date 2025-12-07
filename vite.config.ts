@@ -15,6 +15,10 @@ export default defineConfig({
         target: "http://34.111.120.224",
         changeOrigin: true,
       },
+      "/auth": {
+        target: "http://34.111.120.224",
+        changeOrigin: true,
+      },
     },
   },
 });

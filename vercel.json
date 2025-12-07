@@ -7,6 +7,10 @@
     {
       "source": "/shotdata/:path*",
       "destination": "http://34.111.120.224/shotdata/:path*"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "http://34.111.120.224/auth/:path*"
     }
   ]
 }

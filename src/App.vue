@@ -32,17 +32,34 @@
 import { ref, onMounted } from "vue";
 import Header from "./components/Header.vue";
 import Main from "./components/Main.vue";
+import { parseCSV } from "./services/utils/csvService";
 
 const isAuthorized = ref(false);
 const isExiting = ref(false);
 
-const allowedUsers = [
-  "nicolas@futurerobot.dev",
-  "itsupport@bballbreakdown.com",
-  "coachnick@bballbreakdown.com",
-  "gabriela@futurerobot.dev",
-  "tomy@futurerobot.dev",
-];
+const allowedUsers = ref(new Set());
+
+const ALLOWED_USERS_URL = "/auth/";
+
+async function loadAllowedUsers() {
+  try {
+    const parsed = await parseCSV(`${ALLOWED_USERS_URL}/allowed-users.csv`);
+
+    const emails = parsed
+      .map((row) =>
+        String(row.email ?? row.Email ?? row.mail ?? row.Mail ?? "")
+          .trim()
+          .toLowerCase()
+      )
+      .filter(Boolean);
+
+    allowedUsers.value = new Set(emails);
+
+    console.log("[Allowed users loaded from CSV]:", emails);
+  } catch (err) {
+    console.error("Error loading allowed users CSV:", err);
+  }
+}
 
 function enterAuthorized() {
   isAuthorized.value = true;
@@ -54,7 +71,7 @@ function setupGoogleButton(retries = 10) {
   const target = document.getElementById("g_id_signin");
   if (!target) return;
 
-  if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+  if (!window.google || !window.google.accounts?.id) {
     if (retries <= 0) return;
     setTimeout(() => setupGoogleButton(retries - 1), 300);
     return;
@@ -75,9 +92,13 @@ function setupGoogleButton(retries = 10) {
 
 async function handleCredentialResponse(response) {
   const payload = parseJwt(response.credential);
-  const email = payload.email;
+  const email = payload.email?.toLowerCase();
 
-  if (allowedUsers.includes(email)) {
+  if (!allowedUsers.value.size) {
+    console.warn("Allowed users not loaded yet");
+  }
+
+  if (email && allowedUsers.value.has(email)) {
     localStorage.setItem("auth", "true");
     isExiting.value = true;
 
@@ -101,13 +122,14 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
-onMounted(() => {
+onMounted(async () => {
   const logged = localStorage.getItem("auth") === "true";
   if (logged) {
     enterAuthorized();
     return;
   }
 
+  await loadAllowedUsers();
   setupGoogleButton();
 });
 </script>
