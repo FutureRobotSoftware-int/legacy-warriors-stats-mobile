@@ -74,8 +74,8 @@ const availablePeriods = computed(() => {
 <template>
   <header class="bg-black p-0 text-white font-medium">
     <!-- Version info -->
-    <p class="absolute text-sm">ShotBreakdown</p>
-    <p class="absolute text-sm right-0">v.0.4.8</p>
+    <p class="absolute text-sm">3BallBreakdown</p>
+    <p class="absolute text-sm right-0">v.0.5.0</p>
 
     <!-- Main navigation controls -->
     <div class="flex items-center justify-between mx-24">
