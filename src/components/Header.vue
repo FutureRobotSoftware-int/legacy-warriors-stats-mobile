@@ -4,6 +4,7 @@ import { usePlayers } from "../services/stores/players";
 import { usePeriod } from "../services/stores/year";
 import { useGraphFilters } from "../services/stores/graphFilters";
 import { loadPlayers } from "../services/data/dataLoader";
+import { useShotData } from "../services/stores/shotData";
 
 // Reactive state using TypeScript types for better type safety
 const selectedPlayerId = ref<number | "">("");
@@ -13,6 +14,17 @@ const selectedPeriodId = ref<number | "">("");
 const playersStore = usePlayers();
 const periodStore = usePeriod();
 const graphFiltersStore = useGraphFilters();
+
+const shotStore = useShotData();
+
+watch(
+  () => periodStore.selectedPeriod,
+  (period) => {
+    const periodValue = period && typeof period !== 'string' ? period.id.toString() : "all";
+    shotStore.applyPeriod(periodValue);
+  }
+);
+
 
 /**
  * Watches for changes in graph filters and resets to default when filters are cleared

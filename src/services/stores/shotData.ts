@@ -6,7 +6,8 @@ import { useGraphFilters } from "./graphFilters";
 type FilterPredicate = (entry: IShotData) => boolean;
 
 export const useShotData = defineStore("shotData", {
-  state: (): { entries: IShotData[]; nextId: number } => ({
+  state: (): { allEntries:IShotData[]; entries: IShotData[]; nextId: number } => ({
+    allEntries: [],
     entries: [],
     nextId: 1,
   }),
@@ -71,19 +72,31 @@ export const useShotData = defineStore("shotData", {
       return this.entries.find((entry) => entry.id === id);
     },
 
+    addData(rawEntries: Omit<IShotData, "id">[]) {
+      const entriesWithId = rawEntries.map((entry) => ({
+        ...entry,
+        id: this.nextId++,
+      }));
+
+      this.allEntries.push(...entriesWithId);
+      this.entries.push(...entriesWithId);
+    },
+
     clearData() {
+      this.allEntries = [];
       this.entries = [];
       this.nextId = 1;
     },
 
-    addData(newEntries: Omit<IShotData, "id">[]) {
-      const ids = newEntries.map((entry) => {
-        const id = this.nextId++;
-        this.entries.push({ id, ...entry });
-        return id;
-      });
-      console.log("Charged data:", ids.length);
-      return ids;
+    applyPeriod(period: string | "all") {
+      if (period === "all") {
+        this.entries = [...this.allEntries];
+        return;
+      }
+
+      this.entries = this.allEntries.filter(
+        (entry) => entry.Year === period
+      );
     },
 
     // Column value helpers
