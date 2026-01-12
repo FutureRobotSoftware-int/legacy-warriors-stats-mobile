@@ -29,7 +29,9 @@ const {
   loadSequentially
 } = useVideoLoader()
 
-
+watch(loadedVideos, () => {
+  console.log('Loaded videos:', loadedVideos.value.size)
+})
 
 const {
   videoPlayers,
