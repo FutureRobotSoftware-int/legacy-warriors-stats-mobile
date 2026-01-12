@@ -3,12 +3,10 @@ import { computed, ref, watch } from 'vue'
 import { useCarousel } from '../../../services/utils/useCarousel'
 import { useVideoLoader } from '../../../services/footage/useVideoLoader'
 import { useVideoPlayers } from '../../../services/footage/useVideoPlayers'
-import 'video.js/dist/video-js.css'
 import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
 import SingleTable from '../../tabs/SingleTable.vue'
 import { usePeriod } from '../../../services/stores/year'
 
-// Composable setup
 const {
   mode,
   isLoading,
@@ -22,111 +20,80 @@ const {
   handleSlideSelect
 } = useCarousel()
 
-const {
-  loadedVideos,
-  videoItems,
-  loadBatch,
-  loadSequentially
-} = useVideoLoader()
-
-watch(loadedVideos, () => {
-  console.log('Loaded videos:', loadedVideos.value.size)
-})
-
-const {
-  videoPlayers,
-  playPlayer,
-  pauseAllPlayers
-} = useVideoPlayers()
+const { videoItems, loadBatch, loadSequentially } = useVideoLoader()
+const { playPlayer, pauseAllPlayers } = useVideoPlayers()
 
 const periodStore = usePeriod()
 
 const selectedPeriod = computed(() => periodStore.selectedPeriod?.period)
+const effectivePeriod = computed(() =>
+  selectedPeriod.value === 'All time' ? null : selectedPeriod.value
+)
 
-// Load videos with lazy loading
+// 🔒 Persistente
+const lastContext = ref<{ player: string; period: string | null }>({
+  player: '',
+  period: null
+})
+
+
 async function loadDriveVideos() {
   if (isLoading.value) return
 
-  isLoading.value = true
+  const playerSlug = playerStore.selectedPlayer?.data?.toLowerCase()
+  if (!playerSlug) return
 
-  const idsToShow = getIdsByMode()
-  const playerSlug = playerStore.selectedPlayer?.data.toLowerCase()
-  const period = selectedPeriod.value
-
-  if (!playerSlug || !period || period === "All time") {
-    isLoading.value = false
-    return
-  }
-
-  const lastContext = ref({ player: '', period: '' })
+  const ids = getIdsByMode()
+  const period = effectivePeriod.value ?? null
 
   if (
     lastContext.value.player === playerSlug &&
     lastContext.value.period === period &&
-    JSON.stringify(videoItems.value.map(i => i.id)) === JSON.stringify(idsToShow)
+    JSON.stringify(videoItems.value.map(v => v.id)) === JSON.stringify(ids)
   ) {
-    isLoading.value = false
     return
   }
-
+  
+  isLoading.value = true
   lastContext.value = { player: playerSlug, period }
 
-  // Init placeholders
-  videoItems.value = idsToShow.map(id => ({
+  // Placeholder correcto
+  videoItems.value = ids.map(id => ({
     id,
-    videoUrl: null
+    videoUrl: null // loading
   }))
 
-  // First batch
-  const initialBatch = idsToShow.slice(0, 3)
-  await loadBatch(initialBatch, playerSlug, period)
-
-  // Sequential loading
+  const firstBatch = ids.slice(0, 3)
+  await loadBatch(firstBatch, playerSlug, period)
   loadSequentially(playerSlug, period)
 
   isLoading.value = false
-
-  console.log('Loading videos', {
-  ids: idsToShow.length,
-  playerSlug,
-  period
-})
 }
 
-
-// Handle navigation
-const handleNavigation = (direction: 'prev' | 'next') => {
+// Navegación
+function handleNavigation(direction: 'prev' | 'next') {
   pauseAllPlayers()
-  if (direction === 'prev') {
-    emblaApi.value?.scrollPrev()
-  } else {
-    emblaApi.value?.scrollNext()
-  }
-  const selectedIndex = handleSlideSelect()
-  if (selectedIndex !== undefined) {
-    // Small timeout to ensure the slide transition is complete
-    setTimeout(() => {
-      playPlayer(selectedIndex)
-    }, 100)
+  direction === 'prev'
+    ? emblaApi.value?.scrollPrev()
+    : emblaApi.value?.scrollNext()
+
+  const index = handleSlideSelect()
+  if (index !== undefined) {
+    setTimeout(() => playPlayer(index), 100)
   }
 }
 
-console.log(videoItems);
+const dynamicEntries = computed(() =>
+  videoItems.value.map(item => {
+    const shotInfo = shotData.getById(Number(item.id)) ?? null
 
-const dynamicEntries = computed(() => {
-  const items = videoItems.value;
-  return items.map(videoItem => {
-    const shotInfo = shotData.getById(parseInt(videoItem.id));
     return {
-      ...videoItem,       
-      metadata: {
-        ...shotInfo
-      },         
-    };
-  });
-});
+      ...item,
+      metadata: shotInfo
+    }
+  })
+)
 
-console.log(dynamicEntries)
 
 watch(
   () => [
@@ -138,7 +105,6 @@ watch(
   loadDriveVideos,
   { immediate: true }
 )
-
 </script>
 
 <template>
@@ -164,32 +130,37 @@ watch(
           <div
             v-for="(item, index) in dynamicEntries"
             :key="item.id"
-            class="min-w-full px-2 space-y-2"
+            class="min-w-full px-2 space-y-4"
           >
-            <!-- Loading state -->
-            <div v-if="!item.videoUrl" class="bg-gray-100 w-full aspect-video flex items-center justify-center">
+
+            <!-- ✅ TABLA SIEMPRE -->
+            <SingleTable :metadata="item.metadata" />
+
+            <!-- ⏳ LOADING -->
+            <div
+              v-if="item.videoUrl === null"
+              class="bg-gray-100 w-full aspect-video flex items-center justify-center"
+            >
               <span class="loading loading-spinner text-primary"></span>
             </div>
-            
-            <!-- Video player -->
-            <div v-else-if="item.videoUrl" class="flex flex-col justify-center">
-              <!-- Modified container for SingleTable -->
-              <div class="flex justify-center w-full mb-4">
-                <SingleTable :metadata="item.metadata" />
-              </div>
-              
-              <VideoPlayer 
-                :src="item.videoUrl" 
-                :autoplay="index === 0"
-                ref="videoPlayers"
-              />
-            </div>
-            
-            <!-- Missing footage message -->
-            <div v-else class="bg-base-200 border border-base-300 p-4 text-center rounded-md text-sm text-gray-600">
+
+            <!-- ▶️ VIDEO -->
+            <VideoPlayer
+              v-else-if="item.videoUrl"
+              :src="item.videoUrl"
+              :autoplay="index === 0"
+            />
+
+            <!-- ❌ NO FOOTAGE (FIJO, NO TOCADO) -->
+            <div
+              v-else
+              class="bg-base-200 border border-base-300 p-4 text-center rounded-md text-sm text-gray-600"
+            >
               <strong>No footage found</strong> for ID <code>{{ item.id }}</code>.
             </div>
+
           </div>
+
         </div>
       </div>
 

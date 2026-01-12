@@ -3,7 +3,7 @@ const GCS_BASE_URL = "";
 export function getGCSVideoUrl(
   shotId: string | number,
   playerSlug: string,
-  period: string
+  period?: string | null
 ): string {
   return `${GCS_BASE_URL}/players/${playerSlug}/${period}/videos/${shotId}.mp4`;
 }

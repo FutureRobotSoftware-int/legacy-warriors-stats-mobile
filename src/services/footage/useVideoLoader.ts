@@ -7,22 +7,22 @@ export function useVideoLoader() {
   const currentLoadingIndex = ref(3)
   const isSequentialLoading = ref(false)
 
-  const makeKey = (id: string, player: string, period: string) =>
+  const makeKey = (id: string, player: string, period: string | null) =>
     `${player}|${period}|${id}`
 
   async function loadBatch(
     ids: string[],
     playerSlug: string,
-    period: string
+    period: string | null
   ) {
-    if (period === "All time") return
+    if (period === "All time" || period === null) return
 
     const results = await Promise.all(
       ids.map(async (id) => {
         const key = makeKey(id, playerSlug, period)
         if (loadedVideos.value.has(key)) return null
 
-        const url = await fetchGCSVideoUrl(id, playerSlug, period)
+        const url = await fetchGCSVideoUrl(id, playerSlug, period as string)
         loadedVideos.value.add(key)
 
         return { id, videoUrl: url }
@@ -36,7 +36,7 @@ export function useVideoLoader() {
     })
   }
 
-  async function loadSequentially(playerSlug: string, period: string) {
+  async function loadSequentially(playerSlug: string, period: string | null) {
     if (
       period === "All time" ||
       isSequentialLoading.value ||
@@ -48,7 +48,7 @@ export function useVideoLoader() {
     const key = makeKey(id, playerSlug, period)
 
     if (!loadedVideos.value.has(key)) {
-      const url = await fetchGCSVideoUrl(id, playerSlug, period)
+      const url = await fetchGCSVideoUrl(id, playerSlug, period as string)
       loadedVideos.value.add(key)
       videoItems.value[currentLoadingIndex.value] = { id, videoUrl: url }
     }
