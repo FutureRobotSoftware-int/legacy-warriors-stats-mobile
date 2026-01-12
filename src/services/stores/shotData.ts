@@ -6,9 +6,13 @@ import { useGraphFilters } from "./graphFilters";
 type FilterPredicate = (entry: IShotData) => boolean;
 
 export const useShotData = defineStore("shotData", {
-  state: (): { allEntries:IShotData[]; entries: IShotData[]; nextId: number } => ({
-    allEntries: [],
+  state: (): {
+    entries: IShotData[];      
+    baseEntries: IShotData[];   
+    nextId: number;
+  } => ({
     entries: [],
+    baseEntries: [],
     nextId: 1,
   }),
   getters: {
@@ -72,29 +76,32 @@ export const useShotData = defineStore("shotData", {
       return this.entries.find((entry) => entry.id === id);
     },
 
-    addData(rawEntries: Omit<IShotData, "id">[]) {
-      const entriesWithId = rawEntries.map((entry) => ({
-        ...entry,
-        id: this.nextId++,
-      }));
-
-      this.allEntries.push(...entriesWithId);
-      this.entries.push(...entriesWithId);
+    clearData() {
+      this.entries = [];
+      this.baseEntries = [];
+      this.nextId = 1;
     },
 
-    clearData() {
-      this.allEntries = [];
-      this.entries = [];
-      this.nextId = 1;
+    addData(newEntries: Omit<IShotData, "id">[]) {
+      const entriesWithId = newEntries.map((entry) => ({
+        id: this.nextId++,
+        ...entry,
+      }));
+
+      this.baseEntries.push(...entriesWithId);
+
+      this.entries.push(...entriesWithId);
+
+      console.log("Charged data:", entriesWithId.length);
     },
 
     applyPeriod(period: string | "all") {
       if (period === "all") {
-        this.entries = [...this.allEntries];
+        this.entries = [...this.baseEntries];
         return;
       }
 
-      this.entries = this.allEntries.filter(
+      this.entries = this.baseEntries.filter(
         (entry) => entry.Year === period
       );
     },

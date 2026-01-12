@@ -69,25 +69,31 @@ export const usePeriod = defineStore('period', {
 
         selectPeriod(period: IPeriod) {
             const filterStore = useGraphFilters();
+            const shotStore = useShotData();
 
+            // 1. UI state
             this.periods.forEach(p => {
                 p.isSelected = false;
             });
-
             period.isSelected = true;
 
+            // 2. Reset visual filters
             filterStore.clearFilter("Year");
 
-            if (period.period !== "All time") {
-                filterStore.replaceFilter("Year", period.period);
+            // 3. Dataset scope (ESTO ES LO NUEVO)
+            if (period.period === "All time") {
+                shotStore.applyPeriod("all");
+                return;
             }
 
-            if (period.period !== "All time") {
-                filterStore.setFilter("Year", period.period, true);
-            }
+            // 4. Aplicar período
+            shotStore.applyPeriod(period.period);
 
-            // console.log("[Period Selected]:", period);
-        },
+            // 5. Mantener compatibilidad con graph filters
+            filterStore.replaceFilter("Year", period.period);
+            filterStore.setFilter("Year", period.period, true);
+            },
+
 
         selectAllTime() {
             const allTime = this.allTimePeriod;
