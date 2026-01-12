@@ -21,6 +21,9 @@ export const useShotData = defineStore("shotData", {
       state.entries.filter((entry) => entry["Make/Miss"].trim() === "Make"),
     getByMakeMiss: (state) => (value: string) =>
       state.entries.filter((entry) => entry["Make/Miss"].trim() === value),
+    getAllPeriods(state): string[] {
+      return [...new Set(state.baseEntries.map(e => e.Year))];
+    },
 
     // Reusable filter function to avoid code duplication
     _activeEntriesFilter(): FilterPredicate {

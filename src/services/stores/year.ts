@@ -24,7 +24,7 @@ export const usePeriod = defineStore('period', {
     actions: {
         addPeriods() {
             const shotDataStore = useShotData();
-            const uniquePeriods = shotDataStore.getUniqueColumnValues("Year");
+            const uniquePeriods = shotDataStore.getAllPeriods;
 
             this.periods = [{
                 id: this.nextId++,
@@ -45,8 +45,7 @@ export const usePeriod = defineStore('period', {
             this.clearPeriods();
 
             const shotDataStore = useShotData();
-            const uniquePeriods = shotDataStore.getUniqueColumnValues("Year");
-
+            const uniquePeriods = shotDataStore.getAllPeriods;
             this.periods = [{
                 id: this.nextId++,
                 period: "All time",
