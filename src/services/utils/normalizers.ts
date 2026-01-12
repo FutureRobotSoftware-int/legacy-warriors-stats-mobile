@@ -1,4 +1,4 @@
-export function normalizeShotEntry(entry: any, period: string) {
+export function normalizeShotEntry(entry: any) {
   const normalized = { ...entry };
 
   if (normalized["Pass Direction"] === "N/A Off Dribble") {
@@ -8,9 +8,6 @@ export function normalizeShotEntry(entry: any, period: string) {
   if (normalized["Off Dribble Hand"] === "N/A") {
     normalized["Off Dribble Hand"] = "Catch & Shoot";
   }
-
-  normalized.Year = period;
-
 
   return normalized;
 }

@@ -110,7 +110,7 @@ export async function loadShotData(player: string) {
       }
 
       const entries: Omit<IShotData, "id">[] = parsedData.map((raw) =>
-        normalizeShotEntry(raw, row.period)
+        normalizeShotEntry(raw)
       );
 
       console.log("Normalized entries:", entries.length);
