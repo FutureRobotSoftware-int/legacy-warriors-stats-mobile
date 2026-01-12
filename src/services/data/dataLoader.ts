@@ -67,27 +67,65 @@ export async function loadFilters() {
 export async function loadShotData(player: string) {
   const playerSlug = formatToSlug(player);
 
+  console.group(`[ShotData] Loading data for player: ${player}`);
+  console.log("Slug:", playerSlug);
+
   // 1. Load index
   const index = await parseCSV(PLAYERS_INDEX_URL) as PlayerIndexRow[];
+  console.log("Index rows loaded:", index.length);
+  console.table(index.slice(0, 5));
 
   // 2. Filter rows for selected player
   const playerRows = index.filter(
     (row) => row.slug === playerSlug
   );
 
+  console.log("Matching rows for player:", playerRows.length);
+  console.table(playerRows);
+
   const shotStore = useShotData();
   shotStore.clearData();
+  console.log("Shot store cleared");
 
   // 3. Load and merge all shotdata CSVs
   for (const row of playerRows) {
-    if (!row.shotdata_path || !row.period) continue;
+    console.group(`→ Period ${row.period}`);
 
-    const parsedData = await parseCSV(row.shotdata_path) as any[];
+    if (!row.shotdata_path) {
+      console.warn("Missing shotdata_path", row);
+      console.groupEnd();
+      continue;
+    }
 
-    const entries: Omit<IShotData, "id">[] = parsedData.map((raw) =>
-      normalizeShotEntry(raw, row.period)
-    );
+    console.log("Loading CSV from:", row.shotdata_path);
 
-    shotStore.addData(entries);
+    try {
+      const parsedData = await parseCSV(row.shotdata_path) as any[];
+      console.log("CSV rows loaded:", parsedData.length);
+
+      if (!parsedData.length) {
+        console.warn("CSV is empty:", row.shotdata_path);
+        console.groupEnd();
+        continue;
+      }
+
+      const entries: Omit<IShotData, "id">[] = parsedData.map((raw) =>
+        normalizeShotEntry(raw, row.period)
+      );
+
+      console.log("Normalized entries:", entries.length);
+      console.table(entries.slice(0, 3));
+
+      shotStore.addData(entries);
+      console.log("Entries added to store");
+
+    } catch (err) {
+      console.error("Failed to load CSV:", row.shotdata_path, err);
+    }
+
+    console.groupEnd();
   }
+
+  console.log("Total entries in store:", shotStore.entries.length);
+  console.groupEnd();
 }
