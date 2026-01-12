@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useCarousel } from '../../../services/utils/useCarousel'
 import { useVideoLoader } from '../../../services/footage/useVideoLoader'
 import { useVideoPlayers } from '../../../services/footage/useVideoPlayers'
@@ -29,9 +29,6 @@ const {
   loadSequentially
 } = useVideoLoader()
 
-watch(loadedVideos, () => {
-  console.log('Loaded videos:', loadedVideos.value.size)
-})
 
 
 const {
@@ -55,18 +52,22 @@ async function loadDriveVideos() {
   const period = selectedPeriod.value
 
   if (!playerSlug || !period || period === "All time") {
-    videoItems.value = []
     isLoading.value = false
     return
   }
 
+  const lastContext = ref({ player: '', period: '' })
+
   if (
-    JSON.stringify(videoItems.value.map(i => i.id)) ===
-    JSON.stringify(idsToShow)
+    lastContext.value.player === playerSlug &&
+    lastContext.value.period === period &&
+    JSON.stringify(videoItems.value.map(i => i.id)) === JSON.stringify(idsToShow)
   ) {
     isLoading.value = false
     return
   }
+
+  lastContext.value = { player: playerSlug, period }
 
   // Init placeholders
   videoItems.value = idsToShow.map(id => ({
@@ -82,6 +83,12 @@ async function loadDriveVideos() {
   loadSequentially(playerSlug, period)
 
   isLoading.value = false
+
+  console.log('Loading videos', {
+  ids: idsToShow.length,
+  playerSlug,
+  period
+})
 }
 
 
@@ -102,10 +109,6 @@ const handleNavigation = (direction: 'prev' | 'next') => {
   }
 }
 
-// Watch for changes to active IDs or mode
-watch(() => [...shotData.getActiveIds], loadDriveVideos, { immediate: true })
-watch(mode, loadDriveVideos, { deep: false })
-
 console.log(videoItems);
 
 const dynamicEntries = computed(() => {
@@ -123,7 +126,16 @@ const dynamicEntries = computed(() => {
 
 console.log(dynamicEntries)
 
-watch(selectedPeriod, loadDriveVideos)
+watch(
+  () => [
+    ...shotData.getActiveIds,
+    mode.value,
+    selectedPeriod.value,
+    playerStore.selectedPlayer?.data
+  ],
+  loadDriveVideos,
+  { immediate: true }
+)
 
 </script>
 
