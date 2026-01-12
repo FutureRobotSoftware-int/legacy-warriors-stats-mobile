@@ -6,28 +6,39 @@ import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
 import SingleTable from '../../tabs/SingleTable.vue'
 
 const props = defineProps<{
-  entry: IShotData,
-  folderPath?: string
+  entry: IShotData
+  playerSlug: string
+  period: string
 }>()
+
 
 const videoUrl = ref('')
 const isLoading = ref(true)
 
 // Load video from GCS
 async function loadVideo() {
+
+  if (props.period === "All time") {
+    videoUrl.value = ''
+    isLoading.value = false
+    return
+  }
+
   try {
     isLoading.value = true
+
+    if (!props.playerSlug || !props.period || props.period === "All time") {
+      videoUrl.value = ''
+      return
+    }
+
     const url = await fetchGCSVideoUrl(
-      String(props.entry.id), 
-      props.folderPath?.toLowerCase()
+      props.entry.id,
+      props.playerSlug,
+      props.period
     )
 
-    if (url) {
-      videoUrl.value = url
-    } else {
-      console.warn(`Video not found in GCS: ID ${props.entry.id}`, props.folderPath?.toLowerCase())
-      videoUrl.value = ''
-    }
+    videoUrl.value = url ?? ''
   } catch (error) {
     console.error('Error loading video:', error)
     videoUrl.value = ''
@@ -37,7 +48,11 @@ async function loadVideo() {
 }
 
 // Watch for changes to entry or folderPath
-watch(() => [props.entry, props.folderPath], loadVideo, { immediate: true })
+watch(
+  () => [props.entry.id, props.playerSlug, props.period],
+  loadVideo,
+  { immediate: true }
+)
 
 // Expose methods if needed
 defineExpose({

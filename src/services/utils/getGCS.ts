@@ -1,63 +1,23 @@
-const CACHE_KEY = "gcsVideoCache";
+const GCS_BASE_URL = "";
 
-interface CacheEntry {
-  url: string | null;
-  timestamp: number;
+export function getGCSVideoUrl(
+  shotId: string | number,
+  playerSlug: string,
+  period: string
+): string {
+  return `${GCS_BASE_URL}/players/${playerSlug}/${period}/videos/${shotId}.mp4`;
 }
 
-// Load cache from localStorage
-function loadCache(): Map<string, CacheEntry> {
-  const cachedData = localStorage.getItem(CACHE_KEY);
-  return cachedData ? new Map(JSON.parse(cachedData)) : new Map();
-}
-
-// Save cache to localStorage
-function saveCache(cache: Map<string, CacheEntry>) {
-  localStorage.setItem(CACHE_KEY, JSON.stringify(Array.from(cache.entries())));
-}
-
-const cache = loadCache();
-
-const GCS_BASE_URL = "/videos/";
-
-// Generate GCS video URL
-export function getGCSVideoUrl(videoName: string): string {
-  return `${GCS_BASE_URL}${videoName}.mp4`;
-}
-
-/**
- * Fetch GCS video URL with caching mechanism
- * @param videoName - Name of the video file (without extension)
- * @param folderPath - Path to the video in the bucket
- * @returns Promise with video URL or null if not found
- */
 export async function fetchGCSVideoUrl(
-  videoName: string,
-  folderPath: string = ""
+  shotId: string | number,
+  playerSlug: string,
+  period: string
 ): Promise<string | null> {
-  const cacheKey = `${folderPath}/${videoName}`;
-  const now = Date.now();
-  const TTL = 24 * 60 * 60 * 1000; // 24 hours
+  const url = getGCSVideoUrl(shotId, playerSlug, period);
 
-  // Check cache first
-  const cached = cache.get(cacheKey);
-  if (cached && now - cached.timestamp < TTL) {
-    return cached.url;
-  }
-
-  const videoUrl = getGCSVideoUrl(`${folderPath}/${videoName}`);
-
-  // Optional: Verify if video exists (requires CORS)
   try {
-    const response = await fetch(videoUrl, { method: "HEAD" });
-    if (response.ok) {
-      cache.set(cacheKey, { url: videoUrl, timestamp: now });
-      saveCache(cache);
-      return videoUrl;
-    }
-    console.log(response);
-
-    return null;
+    const res = await fetch(url, { method: "HEAD" });
+    return res.ok ? url : null;
   } catch {
     return null;
   }

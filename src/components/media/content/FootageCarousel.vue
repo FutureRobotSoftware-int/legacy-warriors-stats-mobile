@@ -6,6 +6,7 @@ import { useVideoPlayers } from '../../../services/footage/useVideoPlayers'
 import 'video.js/dist/video-js.css'
 import VideoPlayer from '../videoPlayer/VideoPlayer.vue'
 import SingleTable from '../../tabs/SingleTable.vue'
+import { usePeriod } from '../../../services/stores/year'
 
 // Composable setup
 const {
@@ -34,37 +35,50 @@ const {
   pauseAllPlayers
 } = useVideoPlayers()
 
+const periodStore = usePeriod()
+
+const selectedPeriod = computed(() => periodStore.selectedPeriod?.period)
+
 // Load videos with lazy loading
 async function loadDriveVideos() {
-  if (isLoading.value) return;
+  if (isLoading.value) return
 
   isLoading.value = true
-  const idsToShow = getIdsByMode()
-  const selectedFolder = playerStore.selectedPlayer?.data.toLowerCase()
 
-  if (!selectedFolder) {
+  const idsToShow = getIdsByMode()
+  const playerSlug = playerStore.selectedPlayer?.data.toLowerCase()
+  const period = selectedPeriod.value
+
+  if (!playerSlug || !period || period === "All time") {
     videoItems.value = []
     isLoading.value = false
     return
   }
 
-  if (JSON.stringify(videoItems.value.map(i => i.id)) === JSON.stringify(idsToShow)) {
+  if (
+    JSON.stringify(videoItems.value.map(i => i.id)) ===
+    JSON.stringify(idsToShow)
+  ) {
     isLoading.value = false
     return
   }
 
-  // Initialize all items with null URLs
-  videoItems.value = idsToShow.map(id => ({ id, videoUrl: null }))
+  // Init placeholders
+  videoItems.value = idsToShow.map(id => ({
+    id,
+    videoUrl: null
+  }))
 
-  // Load only the first 3 videos initially
+  // First batch
   const initialBatch = idsToShow.slice(0, 3)
-  await loadBatch(initialBatch, selectedFolder)
+  await loadBatch(initialBatch, playerSlug, period)
 
-  // Start sequential loading for the rest
-  loadSequentially(selectedFolder)
+  // Sequential loading
+  loadSequentially(playerSlug, period)
 
   isLoading.value = false
 }
+
 
 // Handle navigation
 const handleNavigation = (direction: 'prev' | 'next') => {
@@ -104,6 +118,8 @@ const dynamicEntries = computed(() => {
 
 console.log(dynamicEntries)
 
+watch(selectedPeriod, loadDriveVideos)
+
 </script>
 
 <template>
@@ -132,7 +148,7 @@ console.log(dynamicEntries)
             class="min-w-full px-2 space-y-2"
           >
             <!-- Loading state -->
-            <div v-if="!item.videoUrl && !loadedVideos.has(item.id.toString())" class="bg-gray-100 w-full aspect-video flex items-center justify-center">
+            <div v-if="!item.videoUrl" class="bg-gray-100 w-full aspect-video flex items-center justify-center">
               <span class="loading loading-spinner text-primary"></span>
             </div>
             
