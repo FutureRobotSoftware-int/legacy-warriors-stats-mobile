@@ -65,7 +65,9 @@ function closeVideo() {
   >
     <SingleVideoPlayer
       :entry="selectedEntry"
-      :folderPath="playerStore.selectedPlayer?.data"
+      :playerSlug="playerStore.selectedPlayer?.data || ''"
+      :period="selectedEntry.Year"
     />
+
   </ExpandedView>
 </template>
