@@ -16,7 +16,7 @@ const videoUrl = ref('')
 const isLoading = ref(true)
 
 async function loadVideo() {
-  if (!props.playerSlug || !props.period) {
+  if (!props.playerSlug) {
     videoUrl.value = ''
     isLoading.value = false
     return
