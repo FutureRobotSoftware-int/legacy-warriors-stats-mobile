@@ -27,7 +27,7 @@ async function loadVideo() {
     const url = await fetchGCSVideoUrl(
       props.entry.id,
       props.playerSlug,
-      props.period
+      props.entry.Year
     )
     videoUrl.value = url ?? ''
   } catch {
