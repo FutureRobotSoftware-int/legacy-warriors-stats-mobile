@@ -30,7 +30,6 @@ const effectivePeriod = computed(() =>
   selectedPeriod.value === 'All time' ? null : selectedPeriod.value
 )
 
-// 🔒 Persistente
 const lastContext = ref<{ player: string; period: string | null }>({
   player: '',
   period: null
@@ -57,7 +56,6 @@ async function loadDriveVideos() {
   isLoading.value = true
   lastContext.value = { player: playerSlug, period }
 
-  // Placeholder correcto
   videoItems.value = ids.map(id => ({
     id,
     videoUrl: null // loading
@@ -70,7 +68,6 @@ async function loadDriveVideos() {
   isLoading.value = false
 }
 
-// Navegación
 function handleNavigation(direction: 'prev' | 'next') {
   pauseAllPlayers()
   direction === 'prev'
@@ -133,25 +130,21 @@ watch(
             class="min-w-full px-2 space-y-4"
           >
 
-            <!-- ✅ TABLA SIEMPRE -->
             <SingleTable :metadata="item.metadata" />
 
-            <!-- ⏳ LOADING -->
             <div
-              v-if="item.videoUrl === null"
+              v-if="isLoading && !item.videoUrl"
               class="bg-gray-100 w-full aspect-video flex items-center justify-center"
             >
               <span class="loading loading-spinner text-primary"></span>
             </div>
 
-            <!-- ▶️ VIDEO -->
             <VideoPlayer
               v-else-if="item.videoUrl"
               :src="item.videoUrl"
               :autoplay="index === 0"
             />
 
-            <!-- ❌ NO FOOTAGE (FIJO, NO TOCADO) -->
             <div
               v-else
               class="bg-base-200 border border-base-300 p-4 text-center rounded-md text-sm text-gray-600"
