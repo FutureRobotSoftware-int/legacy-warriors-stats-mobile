@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/players.csv",
+      "destination": "http://34.111.120.224/players.csv"
+    },
+    {
+      "source": "/players/:path*",
+      "destination": "http://34.111.120.224/players/:path*"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "http://34.111.120.224/auth/:path*"
+    }
+  ]
+}
