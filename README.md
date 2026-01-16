@@ -1,5 +1,7 @@
-# Vue 3 + TypeScript + Vite
+# warriors-stats-mobile
+Mobile Web App for data visualization.
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Start with npm run dev
 
-Learn more about the recommended Project Setup and IDE Support in [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup)
+
+*This repo has been forked into a new repo in Coach's Nick account*
