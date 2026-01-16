@@ -65,6 +65,28 @@
         Show Hidden
       </button>
 
+      <!-- Export mockup -->
+      <button
+        class="btn btn-outline"
+        title="Export current filtered set"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 3v12m0 0l4-4m-4 4l-4-4M4 21h16"
+          />
+        </svg>
+        Export set
+      </button>
+
       <button 
         @click="$emit('expand')" 
         class="btn btn-info text-info-content"
