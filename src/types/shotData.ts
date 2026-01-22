@@ -1,5 +1,6 @@
 export interface IShotData {
   id: number;
+  seasonShotIndex: number;
   Area: string;
   ["Player Direction"]: string;
   ["Pass Direction"]: string;

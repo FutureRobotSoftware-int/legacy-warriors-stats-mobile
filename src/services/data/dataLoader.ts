@@ -3,7 +3,6 @@ import { formatToSlug } from "../utils/formatter";
 import type { IPlayer } from "../../types/player";
 import { usePlayers } from "../stores/players";
 import { useShotData } from "../stores/shotData";
-import type { IShotData } from "../../types/shotData";
 import { usePeriod } from "../stores/year";
 import { normalizeShotEntry } from "../utils/normalizers";
 
@@ -110,8 +109,9 @@ export async function loadShotData(player: string) {
         continue
       }
 
-      const entries: Omit<IShotData, "id">[] =
-        parsedData.map(normalizeShotEntry)
+      const entries = parsedData.map((raw, index) =>
+        normalizeShotEntry(raw, index + 1, row.season)
+      )
 
       shotStore.addData(entries)
       console.log("Entries added:", entries.length)
