@@ -11,13 +11,23 @@ interface PlayerIndexRow {
   player: string;
   slug: string;
   period: string;
-  shotdata_path: string;
-  footage_path?: string;
   number?: string;
-} 
-
+}
 
 const PLAYERS_INDEX_URL = "/players.csv";
+
+const GCS_BASE_URL = ""
+
+export function buildShotDataPath(
+  playerSlug: string,
+  period?: string | null
+): string {
+  if (!period || period === "All time") {
+    return `${GCS_BASE_URL}/players/${playerSlug}/shotdata.csv`
+  }
+
+  return `${GCS_BASE_URL}/players/${playerSlug}/${period}/shotdata.csv`
+}
 
 /**
  * Load players from index CSV
@@ -89,42 +99,34 @@ export async function loadShotData(player: string) {
 
   // 3. Load and merge all shotdata CSVs
   for (const row of playerRows) {
-    console.group(`→ Period ${row.period}`);
+    console.group(`→ Period ${row.period}`)
 
-    if (!row.shotdata_path) {
-      console.warn("Missing shotdata_path", row);
-      console.groupEnd();
-      continue;
-    }
+    const shotdataPath = buildShotDataPath(playerSlug, row.period)
 
-    console.log("Loading CSV from:", row.shotdata_path);
+    console.log("Loading CSV from:", shotdataPath)
 
     try {
-      const parsedData = await parseCSV(row.shotdata_path) as any[];
-      console.log("CSV rows loaded:", parsedData.length);
+      const parsedData = await parseCSV(shotdataPath) as any[]
 
       if (!parsedData.length) {
-        console.warn("CSV is empty:", row.shotdata_path);
-        console.groupEnd();
-        continue;
+        console.warn("CSV is empty:", shotdataPath)
+        console.groupEnd()
+        continue
       }
 
-      const entries: Omit<IShotData, "id">[] = parsedData.map((raw) =>
-        normalizeShotEntry(raw)
-      );
+      const entries: Omit<IShotData, "id">[] =
+        parsedData.map(normalizeShotEntry)
 
-      console.log("Normalized entries:", entries.length);
-      console.table(entries.slice(0, 3));
-
-      shotStore.addData(entries);
-      console.log("Entries added to store");
+      shotStore.addData(entries)
+      console.log("Entries added:", entries.length)
 
     } catch (err) {
-      console.error("Failed to load CSV:", row.shotdata_path, err);
+      console.error("Failed to load CSV:", shotdataPath, err)
     }
 
-    console.groupEnd();
+    console.groupEnd()
   }
+
 
   console.log("Total entries in store:", shotStore.entries.length);
   console.groupEnd();
