@@ -10,7 +10,7 @@ import { normalizeShotEntry } from "../utils/normalizers";
 interface PlayerIndexRow {
   player: string;
   slug: string;
-  period: string;
+  season: string;
   number?: string;
 }
 
@@ -22,10 +22,6 @@ export function buildShotDataPath(
   playerSlug: string,
   period?: string | null
 ): string {
-  if (!period || period === "All time") {
-    return `${GCS_BASE_URL}/players/${playerSlug}/shotdata.csv`
-  }
-
   return `${GCS_BASE_URL}/players/${playerSlug}/${period}/shotdata.csv`
 }
 
@@ -99,9 +95,9 @@ export async function loadShotData(player: string) {
 
   // 3. Load and merge all shotdata CSVs
   for (const row of playerRows) {
-    console.group(`→ Period ${row.period}`)
+    console.group(`→ Period ${row.season}`)
 
-    const shotdataPath = buildShotDataPath(playerSlug, row.period)
+    const shotdataPath = buildShotDataPath(playerSlug, row.season)
 
     console.log("Loading CSV from:", shotdataPath)
 
