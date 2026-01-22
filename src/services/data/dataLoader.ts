@@ -92,6 +92,8 @@ export async function loadShotData(player: string) {
   shotStore.clearData();
   console.log("Shot store cleared");
 
+  let internalId = 1
+
   // 3. Load and merge all shotdata CSVs
   for (const row of playerRows) {
     console.group(`→ Period ${row.season}`)
@@ -110,7 +112,7 @@ export async function loadShotData(player: string) {
       }
 
       const entries = parsedData.map((raw, index) =>
-        normalizeShotEntry(raw, index + 1, row.season)
+        normalizeShotEntry(raw, index + 1, internalId++)
       )
 
       shotStore.addData(entries)

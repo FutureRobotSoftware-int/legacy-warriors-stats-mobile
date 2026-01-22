@@ -25,7 +25,7 @@ async function loadVideo() {
   try {
     isLoading.value = true
     const url = await fetchGCSVideoUrl(
-      props.entry.id,
+      props.entry.VideoID,
       props.playerSlug,
       props.entry.Year
     )
@@ -38,7 +38,7 @@ async function loadVideo() {
 }
 
 watch(
-  () => [props.entry.id, props.playerSlug, props.period],
+  () => [props.entry.VideoID, props.playerSlug, props.period],
   loadVideo,
   { immediate: true }
 )
@@ -61,6 +61,6 @@ watch(
     v-else
     class="bg-base-200 border border-base-300 p-4 text-center rounded-md text-sm"
   >
-    <strong>No footage found</strong> for ID <code>{{ entry.id }}</code>.
+    <strong>No footage found</strong> for ID <code>{{ entry.VideoID }}</code>.
   </div>
 </template>

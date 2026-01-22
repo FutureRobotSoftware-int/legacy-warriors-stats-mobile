@@ -1,9 +1,7 @@
-let INTERNAL_ID = 1
-
 export function normalizeShotEntry(
   entry: any,
-  seasonShotIndex: number,
-  period: string
+  VideoID: number,
+  id: number
 ) {
   const normalized = { ...entry }
 
@@ -16,9 +14,8 @@ export function normalizeShotEntry(
   }
 
   return {
-    id: INTERNAL_ID++,
-    period,
-    seasonShotIndex,
+    id,
+    VideoID,
     ...normalized,
   }
 }
