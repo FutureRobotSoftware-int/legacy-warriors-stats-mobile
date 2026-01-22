@@ -8,10 +8,6 @@ export function buildShotDataPath(
     playerSlug: string,
     period?: string | null
 ) {
-    if (!period || period === "All time") {
-        return `${buildPlayerFolder(playerSlug)}/shotdata.csv`
-    }
-
     return `${buildPlayerFolder(playerSlug)}/${period}/shotdata.csv`
 }
 
