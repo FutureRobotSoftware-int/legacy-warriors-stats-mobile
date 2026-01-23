@@ -5,6 +5,7 @@ defineProps<{
 
 const fieldsToDisplay = [
   { key: 'id', label: 'id' },
+  { key: 'VideoID', label: 'VideoID' },
   { key: 'Area', label: 'Area' },
   { key: 'Player Direction', label: 'Player Direction' },
   { key: 'Pass Direction', label: 'Pass Direction' },

@@ -1,5 +1,6 @@
 export interface IShotData {
   id: number;
+  VideoID: number;
   Area: string;
   ["Player Direction"]: string;
   ["Pass Direction"]: string;

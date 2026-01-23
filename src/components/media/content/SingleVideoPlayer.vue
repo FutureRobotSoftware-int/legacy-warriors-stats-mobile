@@ -33,7 +33,7 @@ async function loadVideo() {
     }
 
     const url = await fetchGCSVideoUrl(
-      props.entry.id,
+      props.entry.VideoID,
       props.playerSlug,
       props.period
     )
@@ -49,7 +49,7 @@ async function loadVideo() {
 
 // Watch for changes to entry or folderPath
 watch(
-  () => [props.entry.id, props.playerSlug, props.period],
+  () => [props.entry.VideoID, props.playerSlug, props.period],
   loadVideo,
   { immediate: true }
 )
@@ -83,7 +83,7 @@ defineExpose({
       </div>
       
       <div v-else class="bg-base-200 border border-base-300 p-8 text-center rounded-md text-lg">
-        <strong>No footage found</strong> for ID <code>{{ entry.id }}</code>.
+        <strong>No footage found</strong> for ID <code>{{ entry.VideoID }}</code>.
       </div>
     </div>
   </div>
