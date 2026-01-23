@@ -2,7 +2,7 @@
   <div class="absolute inset-0 backface-hidden">
     <div class="h-full card-body text-center p-1 relative">
       
-      <!-- Export button (left) -->
+      <!-- Export button (left)
       <button
         @click="$emit('export')"
         class="absolute left-2 top-2"
@@ -23,6 +23,7 @@
           />
         </svg>
       </button>
+      -->
 
       <!-- Title -->
       <div class="flex items-center justify-center">
