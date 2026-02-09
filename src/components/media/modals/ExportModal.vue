@@ -4,17 +4,9 @@
       <h2 class="text-lg font-semibold mb-4">Export Options</h2>
 
       <div class="space-y-2 max-h-60 overflow-y-auto">
-        <label
-          v-for="category in categories"
-          :key="category"
-          class="flex items-center justify-between"
-        >
+        <label v-for="category in categories" :key="category" class="flex items-center justify-between">
           <span class="text-sm">{{ category }}</span>
-          <input
-            type="checkbox"
-            class="toggle toggle-primary"
-            v-model="localSelection[category]"
-          />
+          <input type="checkbox" class="toggle toggle-primary" v-model="localSelection[category]" />
         </label>
       </div>
 
@@ -36,7 +28,7 @@ import { reactive } from 'vue'
 
 const categories = [
   'Area',
-  'Pass from Direction',
+  'Pass Direction',
   'Offensive Action',
   'Footwork',
   'Off Dribble Hand',
