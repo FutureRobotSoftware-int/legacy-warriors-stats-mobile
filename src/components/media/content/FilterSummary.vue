@@ -65,10 +65,11 @@
         Show Hidden
       </button>
 
-      <!-- Export mockup
+      <!-- Export mockup button -->
       <button
         class="btn btn-outline"
         title="Export current filtered set"
+        @click="$emit('export')"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +87,6 @@
         </svg>
         Export set
       </button>
-      -->
       
       <button 
         @click="$emit('expand')" 
