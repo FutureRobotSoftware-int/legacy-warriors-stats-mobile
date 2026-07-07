@@ -1,14 +1,15 @@
 import { defineStore } from "pinia";
 import type { IShotData } from "../../types/shotData";
 import { useGraphFilters } from "./graphFilters";
+import { getShotResult } from "../utils/normalizers";
 
 // Helper type for filter functions
 type FilterPredicate = (entry: IShotData) => boolean;
 
 export const useShotData = defineStore("shotData", {
   state: (): {
-    entries: IShotData[];      
-    baseEntries: IShotData[];   
+    entries: IShotData[];
+    baseEntries: IShotData[];
     nextId: number;
   } => ({
     entries: [],
@@ -18,9 +19,9 @@ export const useShotData = defineStore("shotData", {
   getters: {
     getAll: (state) => state.entries,
     getMake: (state) =>
-      state.entries.filter((entry) => entry["Make/Miss"].trim() === "Make"),
+      state.entries.filter((entry) => getShotResult(entry["Make/Miss"]) === "Make"),
     getByMakeMiss: (state) => (value: string) =>
-      state.entries.filter((entry) => entry["Make/Miss"].trim() === value),
+      state.entries.filter((entry) => getShotResult(entry["Make/Miss"]) === value),
     getAllPeriods(state): string[] {
       return [...new Set(state.baseEntries.map(e => e.Year))];
     },
@@ -174,7 +175,7 @@ export const useShotData = defineStore("shotData", {
 
       for (const entry of data) {
         const key = String(entry[col]);
-        const result = String(entry["Make/Miss"]).trim();
+        const result = getShotResult(entry["Make/Miss"]);
 
         if (!key) continue;
 
@@ -244,10 +245,13 @@ export const useShotData = defineStore("shotData", {
       let total = 0;
 
       for (const entry of data) {
-        const result = String(entry["Make/Miss"]).trim();
-        if (result === "Make" || result === "Miss") {
-          total += 1;
-          if (result === "Make") makes += 1;
+        const result = getShotResult(entry["Make/Miss"]);
+        if (result) {
+          total++;
+
+          if (result === "Make") {
+            makes++;
+          }
         }
       }
 
@@ -336,13 +340,13 @@ export const useShotData = defineStore("shotData", {
           const stat = dataMap.get(action)?.get(area);
           return stat
             ? {
-                value: stat.count,
-                ppp: Number((stat.totalPTS / stat.count).toFixed(2)),
-              }
+              value: stat.count,
+              ppp: Number((stat.totalPTS / stat.count).toFixed(2)),
+            }
             : {
-                value: 0,
-                ppp: 0,
-              };
+              value: 0,
+              ppp: 0,
+            };
         }),
       }));
 

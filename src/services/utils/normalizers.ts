@@ -19,3 +19,14 @@ export function normalizeShotEntry(
     ...normalized,
   }
 }
+
+export type ShotResult = "Make" | "Miss";
+
+export function getShotResult(value?: unknown): ShotResult | null {
+  if (typeof value !== "string") return null;
+
+  if (/\bmake\b/i.test(value)) return "Make";
+  if (/\bmiss\b/i.test(value)) return "Miss";
+
+  return null;
+}
